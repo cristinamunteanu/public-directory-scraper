@@ -7,8 +7,13 @@ Minimal Python project structure for developing a public directory scraper in sm
 ```text
 .
 ├── src/public_directory_scraper/
-│   └── __init__.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   └── parser.py
 ├── tests/
+│   ├── fixtures/
+│   │   └── simple_listing.html
+│   ├── test_cli_entrypoint.py
 │   └── test_import.py
 ├── pyproject.toml
 ├── README.md
@@ -36,4 +41,10 @@ Run the package entrypoint:
 PYTHONPATH=src .venv/bin/python -m public_directory_scraper
 ```
 
-Next recommended development step: define the smallest core scraping function before adding CLI or UI behavior.
+Parse one saved HTML listing:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/simple_listing.html
+```
+
+Next recommended development step: parse multiple saved listings before adding network fetching.

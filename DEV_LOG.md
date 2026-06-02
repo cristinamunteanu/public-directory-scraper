@@ -37,3 +37,24 @@ PYTHONPATH=src python3 -m public_directory_scraper
 Known limitations:
 - The command only prints the package name and version.
 - No scraping, parsing, fetching, or file output exists yet.
+
+## 2026-06-02
+
+Built the second vertical slice: parse one saved HTML listing.
+
+Why this structure:
+- `parser.py` contains core parsing logic outside the CLI entrypoint.
+- The CLI reads a local HTML file and prints JSON, so the behavior is visible without network access.
+- The parser uses standard-library `HTMLParser` to avoid adding dependencies before a real target site requires them.
+
+How to test:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPATH=src python3 -m public_directory_scraper parse tests/fixtures/simple_listing.html
+```
+
+Known limitations:
+- It only parses one listing.
+- It expects fixture-style `data-field` markers for `name` and `url`.
+- No live fetching, pagination, or CSV export exists yet.

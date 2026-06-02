@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -6,6 +7,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures"
 
 
 class CliEntrypointTest(unittest.TestCase):
@@ -22,6 +24,33 @@ class CliEntrypointTest(unittest.TestCase):
         )
 
         self.assertEqual(result.stdout.strip(), "public-directory-scraper 0.1.0")
+        self.assertEqual(result.stderr, "")
+
+    def test_parse_command_prints_listing_json(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "parse",
+                str(FIXTURES_DIR / "simple_listing.html"),
+            ],
+            check=True,
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(
+            json.loads(result.stdout),
+            {
+                "name": "Example Business",
+                "url": "https://example.com",
+            },
+        )
         self.assertEqual(result.stderr, "")
 
 
