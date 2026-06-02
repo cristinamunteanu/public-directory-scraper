@@ -30,4 +30,10 @@ Run the current test suite:
 .venv/bin/python -m unittest discover -s tests
 ```
 
+Run the package entrypoint:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m public_directory_scraper
+```
+
 Next recommended development step: define the smallest core scraping function before adding CLI or UI behavior.
