@@ -58,3 +58,23 @@ Known limitations:
 - It only parses one listing.
 - It expects fixture-style `data-field` markers for `name` and `url`.
 - No live fetching, pagination, or CSV export exists yet.
+
+## 2026-06-02
+
+Built the third vertical slice: parse multiple saved HTML listings.
+
+Why this structure:
+- `parse_listings()` is the core multi-record function.
+- `parse_listing()` remains as a small compatibility helper for one-record tests and examples.
+- The CLI now prints a JSON array, matching the shape needed for CSV export later.
+
+How to test:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPATH=src python3 -m public_directory_scraper parse tests/fixtures/listings.html
+```
+
+Known limitations:
+- It still expects fixture-style `data-field` markers.
+- It does not fetch live pages, follow pagination, or write files.

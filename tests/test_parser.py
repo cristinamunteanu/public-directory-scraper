@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from public_directory_scraper.parser import parse_listing
+from public_directory_scraper.parser import parse_listing, parse_listings
 
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
@@ -21,9 +21,28 @@ class ParseListingTest(unittest.TestCase):
             },
         )
 
+    def test_parses_multiple_listings(self):
+        html = (FIXTURES_DIR / "listings.html").read_text(encoding="utf-8")
+
+        records = parse_listings(html)
+
+        self.assertEqual(
+            records,
+            [
+                {
+                    "name": "Example Business",
+                    "url": "https://example.com",
+                },
+                {
+                    "name": "Second Business",
+                    "url": "https://second.example",
+                },
+            ],
+        )
+
     def test_requires_name_and_url(self):
         with self.assertRaisesRegex(ValueError, "listing must include name and url"):
-            parse_listing("<article></article>")
+            parse_listings("<article></article>")
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .parser import parse_listing
+from .parser import parse_listings
 
 
 def main(argv=None) -> int:
@@ -13,7 +13,7 @@ def main(argv=None) -> int:
         command = args[0]
         if command == "parse" and len(args) == 2:
             html = Path(args[1]).read_text(encoding="utf-8")
-            print(json.dumps(parse_listing(html)))
+            print(json.dumps(parse_listings(html)))
             return 0
 
         print("Usage: python -m public_directory_scraper [parse HTML_FILE]", file=sys.stderr)

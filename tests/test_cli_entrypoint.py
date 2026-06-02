@@ -36,7 +36,7 @@ class CliEntrypointTest(unittest.TestCase):
                 "-m",
                 "public_directory_scraper",
                 "parse",
-                str(FIXTURES_DIR / "simple_listing.html"),
+                str(FIXTURES_DIR / "listings.html"),
             ],
             check=True,
             capture_output=True,
@@ -46,10 +46,16 @@ class CliEntrypointTest(unittest.TestCase):
 
         self.assertEqual(
             json.loads(result.stdout),
-            {
-                "name": "Example Business",
-                "url": "https://example.com",
-            },
+            [
+                {
+                    "name": "Example Business",
+                    "url": "https://example.com",
+                },
+                {
+                    "name": "Second Business",
+                    "url": "https://second.example",
+                },
+            ],
         )
         self.assertEqual(result.stderr, "")
 
