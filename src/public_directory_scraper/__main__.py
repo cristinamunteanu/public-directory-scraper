@@ -10,6 +10,7 @@ from .scraper import scrape_url
 
 
 def main(argv=None) -> int:
+    """Run the command-line interface and return a process exit code."""
     args = list(sys.argv[1:] if argv is None else argv)
 
     if args:

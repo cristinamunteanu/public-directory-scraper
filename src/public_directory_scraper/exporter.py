@@ -5,6 +5,7 @@ CSV_FIELDS = ["name", "url"]
 
 
 def write_records_csv(records, output_path):
+    """Write listing records to a CSV file and return the number of rows written."""
     path = Path(output_path)
     rows = list(records)
 
