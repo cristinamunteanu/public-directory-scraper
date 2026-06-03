@@ -161,3 +161,25 @@ How to test:
 Known limitations:
 - Fetching is not connected to parsing yet.
 - There are no retries, custom timeout option, saved response files, or pagination.
+
+## 2026-06-03
+
+Built the seventh vertical slice: fetch and parse one page.
+
+Why this structure:
+- `scraper.py` connects the existing fetcher and parser without mixing logic into the CLI.
+- The CLI `scrape URL` command prints the same JSON array shape as `parse`.
+- Tests use mocked fetching for core logic and a local `file://` fixture for CLI behavior.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
+```
+
+Known limitations:
+- It assumes UTF-8 response content.
+- It still expects fixture-style `data-field` HTML markers.
+- No pagination, retries, CSV output for scraped URLs, or target-site-specific parser exists yet.

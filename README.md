@@ -11,7 +11,8 @@ Minimal Python project structure for developing a public directory scraper in sm
 │   ├── __main__.py
 │   ├── exporter.py
 │   ├── fetcher.py
-│   └── parser.py
+│   ├── parser.py
+│   └── scraper.py
 ├── tests/
 │   ├── fixtures/
 │   │   ├── listings.html
@@ -20,6 +21,7 @@ Minimal Python project structure for developing a public directory scraper in sm
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
 │   ├── test_parser.py
+│   ├── test_scraper.py
 │   └── test_import.py
 ├── pyproject.toml
 ├── README.md
@@ -73,4 +75,10 @@ Fetch one URL:
 .venv/bin/python -m public_directory_scraper fetch https://example.com
 ```
 
-Next recommended development step: combine fetching with parsing for one page.
+Fetch and parse one URL:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
+```
+
+Next recommended development step: choose the real target directory page and adapt the parser to its HTML.

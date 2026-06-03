@@ -6,6 +6,7 @@ from . import __version__
 from .exporter import write_records_csv
 from .fetcher import fetch_url
 from .parser import parse_listings
+from .scraper import scrape_url
 
 
 def main(argv=None) -> int:
@@ -24,6 +25,18 @@ def main(argv=None) -> int:
 
             print(f"{result.status_code} {result.reason}")
             print(f"bytes: {len(result.body)}")
+            return 0
+
+        if command == "scrape" and len(args) == 2:
+            url = args[1]
+
+            try:
+                records = scrape_url(url)
+            except (OSError, ValueError) as error:
+                print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
+                return 1
+
+            print(json.dumps(records))
             return 0
 
         if command == "parse" and len(args) in {2, 4}:
@@ -56,7 +69,7 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL | parse HTML_FILE [--output OUTPUT.csv]]"
+            "[fetch URL | scrape URL | parse HTML_FILE [--output OUTPUT.csv]]"
         )
         print(usage, file=sys.stderr)
         return 2

@@ -85,6 +85,39 @@ class CliEntrypointTest(unittest.TestCase):
         self.assertEqual(result.stdout, "200 OK\nbytes: 5\n")
         self.assertEqual(result.stderr, "")
 
+    def test_scrape_command_prints_listing_json(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "scrape",
+                (FIXTURES_DIR / "listings.html").as_uri(),
+            ],
+            check=True,
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(
+            json.loads(result.stdout),
+            [
+                {
+                    "name": "Example Business",
+                    "url": "https://example.com",
+                },
+                {
+                    "name": "Second Business",
+                    "url": "https://second.example",
+                },
+            ],
+        )
+        self.assertEqual(result.stderr, "")
+
     def test_parse_command_writes_listing_csv(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
