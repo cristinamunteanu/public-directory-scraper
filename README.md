@@ -10,6 +10,7 @@ Minimal Python project structure for developing a public directory scraper in sm
 │   ├── __init__.py
 │   ├── __main__.py
 │   ├── exporter.py
+│   ├── fetcher.py
 │   └── parser.py
 ├── tests/
 │   ├── fixtures/
@@ -17,6 +18,7 @@ Minimal Python project structure for developing a public directory scraper in sm
 │   │   └── simple_listing.html
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
+│   ├── test_fetcher.py
 │   ├── test_parser.py
 │   └── test_import.py
 ├── pyproject.toml
@@ -65,4 +67,10 @@ PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures
 
 If the input file is missing or does not contain a valid listing, the command prints an `Error:` message to stderr and exits with a non-zero status.
 
-Next recommended development step: fetch one URL before combining fetching with parsing.
+Fetch one URL:
+
+```bash
+.venv/bin/python -m public_directory_scraper fetch https://example.com
+```
+
+Next recommended development step: combine fetching with parsing for one page.

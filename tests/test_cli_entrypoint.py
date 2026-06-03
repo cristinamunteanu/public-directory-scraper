@@ -60,6 +60,31 @@ class CliEntrypointTest(unittest.TestCase):
         )
         self.assertEqual(result.stderr, "")
 
+    def test_fetch_command_prints_status_and_bytes(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            input_path = Path(temp_dir) / "page.html"
+            input_path.write_text("hello", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "fetch",
+                    input_path.as_uri(),
+                ],
+                check=True,
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+        self.assertEqual(result.stdout, "200 OK\nbytes: 5\n")
+        self.assertEqual(result.stderr, "")
+
     def test_parse_command_writes_listing_csv(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

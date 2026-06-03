@@ -140,3 +140,24 @@ How to test:
 Known limitations:
 - CSV output write errors are still not handled with friendly messages.
 - No live fetching or pagination exists yet.
+
+## 2026-06-03
+
+Built the sixth vertical slice: fetch one URL.
+
+Why this structure:
+- `fetcher.py` contains network fetching logic outside the CLI.
+- The CLI prints only status and byte count, so the first network behavior stays inspectable.
+- Tests mock the fetcher core and use a local `file://` URL for CLI coverage, avoiding live internet dependency.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper fetch https://example.com
+```
+
+Known limitations:
+- Fetching is not connected to parsing yet.
+- There are no retries, custom timeout option, saved response files, or pagination.

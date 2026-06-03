@@ -4,6 +4,7 @@ from pathlib import Path
 
 from . import __version__
 from .exporter import write_records_csv
+from .fetcher import fetch_url
 from .parser import parse_listings
 
 
@@ -12,6 +13,19 @@ def main(argv=None) -> int:
 
     if args:
         command = args[0]
+        if command == "fetch" and len(args) == 2:
+            url = args[1]
+
+            try:
+                result = fetch_url(url)
+            except (OSError, ValueError) as error:
+                print(f"Error: could not fetch {url}: {error}", file=sys.stderr)
+                return 1
+
+            print(f"{result.status_code} {result.reason}")
+            print(f"bytes: {len(result.body)}")
+            return 0
+
         if command == "parse" and len(args) in {2, 4}:
             input_path = args[1]
 
@@ -42,7 +56,7 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[parse HTML_FILE [--output OUTPUT.csv]]"
+            "[fetch URL | parse HTML_FILE [--output OUTPUT.csv]]"
         )
         print(usage, file=sys.stderr)
         return 2
