@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .exporter import write_records_csv
 from .parser import parse_listings
 
 
@@ -11,12 +12,23 @@ def main(argv=None) -> int:
 
     if args:
         command = args[0]
-        if command == "parse" and len(args) == 2:
+        if command == "parse" and len(args) in {2, 4}:
             html = Path(args[1]).read_text(encoding="utf-8")
-            print(json.dumps(parse_listings(html)))
-            return 0
+            records = parse_listings(html)
 
-        print("Usage: python -m public_directory_scraper [parse HTML_FILE]", file=sys.stderr)
+            if len(args) == 4 and args[2] == "--output":
+                count = write_records_csv(records, args[3])
+                print(f"Wrote {count} records to {args[3]}")
+                return 0
+
+            if len(args) == 2:
+                print(json.dumps(records))
+                return 0
+
+        print(
+            "Usage: python -m public_directory_scraper [parse HTML_FILE [--output OUTPUT.csv]]",
+            file=sys.stderr,
+        )
         return 2
 
     print(f"public-directory-scraper {__version__}")

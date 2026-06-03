@@ -78,3 +78,24 @@ PYTHONPATH=src python3 -m public_directory_scraper parse tests/fixtures/listings
 Known limitations:
 - It still expects fixture-style `data-field` markers.
 - It does not fetch live pages, follow pagination, or write files.
+
+## 2026-06-02
+
+Built the fourth vertical slice: save parsed listings to CSV.
+
+Why this structure:
+- `exporter.py` contains CSV writing logic outside the CLI.
+- The CLI keeps JSON output as the default and only writes CSV when `--output` is provided.
+- CSV uses the standard library and fixed `name,url` fields.
+
+How to test:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests
+PYTHONPATH=src python3 -m public_directory_scraper parse tests/fixtures/listings.html --output listings.csv
+```
+
+Known limitations:
+- It does not create missing output directories.
+- It still expects fixture-style HTML markers.
+- No live fetching, pagination, or friendly missing-file errors exist yet.
