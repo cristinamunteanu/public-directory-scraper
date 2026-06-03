@@ -25,10 +25,11 @@ def main(argv=None) -> int:
                 print(json.dumps(records))
                 return 0
 
-        print(
-            "Usage: python -m public_directory_scraper [parse HTML_FILE [--output OUTPUT.csv]]",
-            file=sys.stderr,
+        usage = (
+            "Usage: python -m public_directory_scraper "
+            "[parse HTML_FILE [--output OUTPUT.csv]]"
         )
+        print(usage, file=sys.stderr)
         return 2
 
     print(f"public-directory-scraper {__version__}")

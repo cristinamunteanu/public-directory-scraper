@@ -99,3 +99,23 @@ Known limitations:
 - It does not create missing output directories.
 - It still expects fixture-style HTML markers.
 - No live fetching, pagination, or friendly missing-file errors exist yet.
+
+## 2026-06-03
+
+Configured Ruff linting as a small development tool.
+
+Why this structure:
+- Ruff is listed as an optional `dev` dependency.
+- Configuration lives in `pyproject.toml` with a narrow rule set: pycodestyle errors, Pyflakes, and import sorting.
+- Formatting is not enabled yet, so linting stays separate from code rewriting.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- No automatic formatter is configured.
+- No CI or pre-commit hook runs linting automatically.

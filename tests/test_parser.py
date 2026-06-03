@@ -3,7 +3,6 @@ from pathlib import Path
 
 from public_directory_scraper.parser import parse_listing, parse_listings
 
-
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 

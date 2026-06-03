@@ -39,6 +39,12 @@ Run the current test suite:
 .venv/bin/python -m unittest discover -s tests
 ```
 
+Run linting:
+
+```bash
+.venv/bin/ruff check src tests
+```
+
 Run the package entrypoint:
 
 ```bash

@@ -1,7 +1,6 @@
 import csv
 from pathlib import Path
 
-
 CSV_FIELDS = ["name", "url"]
 
 
