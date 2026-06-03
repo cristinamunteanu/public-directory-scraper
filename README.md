@@ -63,4 +63,6 @@ Save parsed listings to CSV:
 PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/listings.html --output listings.csv
 ```
 
-Next recommended development step: add friendly input errors before adding network fetching.
+If the input file is missing or does not contain a valid listing, the command prints an `Error:` message to stderr and exits with a non-zero status.
+
+Next recommended development step: fetch one URL before combining fetching with parsing.

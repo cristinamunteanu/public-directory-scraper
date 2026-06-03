@@ -13,8 +13,23 @@ def main(argv=None) -> int:
     if args:
         command = args[0]
         if command == "parse" and len(args) in {2, 4}:
-            html = Path(args[1]).read_text(encoding="utf-8")
-            records = parse_listings(html)
+            input_path = args[1]
+
+            try:
+                html = Path(input_path).read_text(encoding="utf-8")
+                records = parse_listings(html)
+            except FileNotFoundError:
+                print(f"Error: file not found: {input_path}", file=sys.stderr)
+                return 1
+            except IsADirectoryError:
+                print(
+                    f"Error: expected a file, got directory: {input_path}",
+                    file=sys.stderr,
+                )
+                return 1
+            except ValueError as error:
+                print(f"Error: {error}", file=sys.stderr)
+                return 1
 
             if len(args) == 4 and args[2] == "--output":
                 count = write_records_csv(records, args[3])

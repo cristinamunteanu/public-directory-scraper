@@ -119,3 +119,24 @@ How to test:
 Known limitations:
 - No automatic formatter is configured.
 - No CI or pre-commit hook runs linting automatically.
+
+## 2026-06-03
+
+Built the fifth vertical slice: friendly parse input errors.
+
+Why this structure:
+- Error handling stays close to the CLI file-reading and parsing path.
+- Parser behavior remains unchanged; the CLI translates common failures into user-facing messages.
+- Tests verify exit code, stdout, and stderr so the command-line contract is explicit.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper parse missing.html
+```
+
+Known limitations:
+- CSV output write errors are still not handled with friendly messages.
+- No live fetching or pagination exists yet.

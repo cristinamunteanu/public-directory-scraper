@@ -102,6 +102,59 @@ class CliEntrypointTest(unittest.TestCase):
             ],
         )
 
+    def test_parse_command_reports_missing_file(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+        missing_path = FIXTURES_DIR / "missing.html"
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "parse",
+                str(missing_path),
+            ],
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr.strip(),
+            f"Error: file not found: {missing_path}",
+        )
+
+    def test_parse_command_reports_invalid_listing_html(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            input_path = Path(temp_dir) / "empty.html"
+            input_path.write_text("<article></article>", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "parse",
+                    str(input_path),
+                ],
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr.strip(),
+            "Error: listing must include name and url",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
