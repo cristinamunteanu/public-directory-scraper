@@ -245,3 +245,31 @@ Known limitations:
 
 Next recommended step:
 - Update `parser.py` to extract Books to Scrape fields from `books_page.html`.
+
+## 2026-06-04
+
+Updated the parser to extract Books to Scrape fields from the saved fixture.
+
+Why this structure:
+- The legacy `data-field` parser behavior remains in place for earlier tests and examples.
+- Books parsing is selected when the HTML contains `product_pod` cards.
+- The parser extracts the planned v1 fields: title, price, availability, rating, book URL, and image URL.
+
+Important tradeoffs:
+- URLs are still extracted as relative URLs from the page.
+- Cleaning, deduplication, CSV field updates, Excel export, and pagination are not part of this slice.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
+```
+
+Known limitations:
+- The parser covers the saved first-page fixture shape only.
+- It does not normalize prices, convert ratings to numbers, or follow pagination.
+
+Next recommended step:
+- Add a cleaning layer for Books records.

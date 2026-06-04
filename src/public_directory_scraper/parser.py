@@ -64,8 +64,115 @@ class _ListingsParser(HTMLParser):
         self._current_record = None
 
 
+class _BooksParser(HTMLParser):
+    """Collect book records from Books to Scrape product_pod markup."""
+
+    def __init__(self):
+        """Prepare parser state for collecting book records."""
+        super().__init__()
+        self._current_book = None
+        self._current_field = None
+        self._field_depth = 0
+        self._field_parts = []
+        self.records = []
+
+    def handle_starttag(self, tag, attrs):
+        """Start collecting product fields from matching Books to Scrape tags."""
+        attrs_by_name = dict(attrs)
+        classes = attrs_by_name.get("class", "").split()
+
+        if tag == "article" and "product_pod" in classes:
+            self._current_book = {
+                "title": "",
+                "price": "",
+                "availability": "",
+                "rating": "",
+                "book_url": "",
+                "image_url": "",
+            }
+            return
+
+        if self._current_book is None:
+            return
+
+        if tag == "img":
+            self._current_book["image_url"] = attrs_by_name.get("src", "").strip()
+
+        if tag == "a" and attrs_by_name.get("title"):
+            self._current_book["title"] = attrs_by_name.get("title", "").strip()
+            self._current_book["book_url"] = attrs_by_name.get("href", "").strip()
+
+        if tag == "p" and "star-rating" in classes:
+            self._current_book["rating"] = next(
+                (class_name for class_name in classes if class_name != "star-rating"),
+                "",
+            )
+
+        if tag == "p" and "price_color" in classes:
+            self._start_field("price")
+            return
+
+        if tag == "p" and "availability" in classes:
+            self._start_field("availability")
+            return
+
+        if self._current_field is not None:
+            self._field_depth += 1
+
+    def handle_data(self, data):
+        """Collect text while inside price or availability fields."""
+        if self._current_field is not None:
+            self._field_parts.append(data)
+
+    def handle_endtag(self, tag):
+        """Finish product records and field text when their tags close."""
+        if self._current_field is not None:
+            self._field_depth -= 1
+            if self._field_depth <= 0:
+                self._finish_field()
+            return
+
+        if tag == "article":
+            self._finish_book()
+
+    def _start_field(self, field):
+        """Start collecting text for a single book field."""
+        self._current_field = field
+        self._field_depth = 1
+        self._field_parts = []
+
+    def _finish_field(self):
+        """Store the collected text for the active book field."""
+        if self._current_book is not None:
+            self._current_book[self._current_field] = _normalize_space(
+                self._field_parts
+            )
+
+        self._current_field = None
+        self._field_depth = 0
+        self._field_parts = []
+
+    def _finish_book(self):
+        """Store the current book record if any field was collected."""
+        if self._current_book is None:
+            return
+
+        if any(self._current_book.values()):
+            self.records.append(self._current_book)
+
+        self._current_book = None
+
+
+def _normalize_space(parts):
+    """Collapse whitespace from a list of text parts."""
+    return " ".join(part.strip() for part in parts if part.strip())
+
+
 def parse_listings(html):
     """Parse all listing records and require each one to have name and URL."""
+    if "product_pod" in html:
+        return _parse_books(html)
+
     parser = _ListingsParser()
     parser.feed(html)
     parser.close()
@@ -77,6 +184,22 @@ def parse_listings(html):
     for record in parser.records:
         if not record["name"] or not record["url"]:
             raise ValueError("listing must include name and url")
+
+    return parser.records
+
+
+def _parse_books(html):
+    """Parse all Books to Scrape records from product_pod markup."""
+    parser = _BooksParser()
+    parser.feed(html)
+    parser.close()
+
+    if not parser.records:
+        raise ValueError("book listing must include title and book_url")
+
+    for record in parser.records:
+        if not record["title"] or not record["book_url"]:
+            raise ValueError("book listing must include title and book_url")
 
     return parser.records
 

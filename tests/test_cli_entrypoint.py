@@ -60,6 +60,53 @@ class CliEntrypointTest(unittest.TestCase):
         )
         self.assertEqual(result.stderr, "")
 
+    def test_parse_command_prints_books_json(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "parse",
+                str(FIXTURES_DIR / "books_page.html"),
+            ],
+            check=True,
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(
+            json.loads(result.stdout),
+            [
+                {
+                    "title": "A Light in the Attic",
+                    "price": "£51.77",
+                    "availability": "In stock",
+                    "rating": "Three",
+                    "book_url": "catalogue/a-light-in-the-attic_1000/index.html",
+                    "image_url": (
+                        "media/cache/2c/da/"
+                        "2cdad67c44b002e7ead0cc35693c0e8b.jpg"
+                    ),
+                },
+                {
+                    "title": "Tipping the Velvet",
+                    "price": "£53.74",
+                    "availability": "In stock",
+                    "rating": "One",
+                    "book_url": "catalogue/tipping-the-velvet_999/index.html",
+                    "image_url": (
+                        "media/cache/26/0c/"
+                        "260c6ae16bce31c8f8c95dadd11e0f83.jpg"
+                    ),
+                },
+            ],
+        )
+        self.assertEqual(result.stderr, "")
+
     def test_fetch_command_prints_status_and_bytes(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

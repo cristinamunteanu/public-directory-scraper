@@ -76,6 +76,12 @@ Parse saved HTML listings:
 PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/listings.html
 ```
 
+Parse the Books to Scrape fixture:
+
+```bash
+.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
+```
+
 Save parsed listings to CSV:
 
 ```bash
@@ -96,6 +102,4 @@ Fetch and parse one URL:
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
 ```
 
-Current parser note: the parser still uses fixture-style `data-field` HTML markers. The next implementation step is to add a saved Books to Scrape fixture and adapt the parser to that page structure.
-
-Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The current parser does not parse this fixture yet.
+Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
