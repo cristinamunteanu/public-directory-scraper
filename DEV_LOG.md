@@ -183,3 +183,38 @@ Known limitations:
 - It assumes UTF-8 response content.
 - It still expects fixture-style `data-field` HTML markers.
 - No pagination, retries, CSV output for scraped URLs, or target-site-specific parser exists yet.
+
+## 2026-06-04
+
+Chose the real target site for the scraper: `https://books.toscrape.com/`.
+
+Why this target:
+- It is a public sandbox website intended for scraping practice.
+- The listing page has repeated book cards, prices, stock text, ratings, detail links, image links, and pagination.
+- It is stable enough for a beginner portfolio scraper without using a real commercial site.
+
+Planned v1 fields:
+- `title`
+- `price`
+- `availability`
+- `rating`
+- `book_url`
+- `image_url`
+
+Important tradeoffs:
+- This slice documents the target only; it does not change parser behavior yet.
+- The current parser still expects fixture-style `data-field` markers.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- No Books to Scrape fixture has been added yet.
+- The parser has not been adapted to the real Books to Scrape HTML.
+
+Next recommended step:
+- Save a small Books to Scrape HTML fixture and write parser tests against it.

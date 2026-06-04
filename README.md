@@ -2,6 +2,19 @@
 
 Minimal Python project structure for developing a public directory scraper in small, testable steps.
 
+## Target
+
+This project will scrape [Books to Scrape](https://books.toscrape.com/), a public sandbox website built for scraping practice.
+
+Planned v1 fields:
+
+- `title`
+- `price`
+- `availability`
+- `rating`
+- `book_url`
+- `image_url`
+
 ## Project Layout
 
 ```text
@@ -81,4 +94,4 @@ Fetch and parse one URL:
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
 ```
 
-Next recommended development step: choose the real target directory page and adapt the parser to its HTML.
+Current parser note: the parser still uses fixture-style `data-field` HTML markers. The next implementation step is to add a saved Books to Scrape fixture and adapt the parser to that page structure.
