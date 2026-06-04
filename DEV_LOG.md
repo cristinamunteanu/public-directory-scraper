@@ -218,3 +218,30 @@ Known limitations:
 
 Next recommended step:
 - Save a small Books to Scrape HTML fixture and write parser tests against it.
+
+## 2026-06-04
+
+Added a compact Books to Scrape HTML fixture.
+
+Why this structure:
+- The fixture keeps only representative product card and pagination markup instead of the full live page.
+- It includes two `product_pod` records with title, detail URL, image URL, rating class, price, and availability text.
+- A small fixture-shape test verifies the expected selectors exist before parser work begins.
+
+Important tradeoffs:
+- This slice does not adapt `parser.py` yet.
+- The fixture is intentionally small so the next parser change is easy to inspect.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The current parser still ignores Books to Scrape markup.
+- The fixture covers only the first-page card shape and a `next` pagination link.
+
+Next recommended step:
+- Update `parser.py` to extract Books to Scrape fields from `books_page.html`.

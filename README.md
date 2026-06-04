@@ -28,8 +28,10 @@ Planned v1 fields:
 │   └── scraper.py
 ├── tests/
 │   ├── fixtures/
+│   │   ├── books_page.html
 │   │   ├── listings.html
 │   │   └── simple_listing.html
+│   ├── test_books_fixture.py
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
@@ -95,3 +97,5 @@ Fetch and parse one URL:
 ```
 
 Current parser note: the parser still uses fixture-style `data-field` HTML markers. The next implementation step is to add a saved Books to Scrape fixture and adapt the parser to that page structure.
+
+Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The current parser does not parse this fixture yet.
