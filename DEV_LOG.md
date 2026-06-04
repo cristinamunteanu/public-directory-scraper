@@ -273,3 +273,33 @@ Known limitations:
 
 Next recommended step:
 - Add a cleaning layer for Books records.
+
+## 2026-06-04
+
+Added a cleaning layer for Books to Scrape records.
+
+Why this structure:
+- `cleaner.py` keeps normalization separate from parser extraction.
+- `parse` still returns raw extracted fields for inspection.
+- `scrape_url()` cleans Books records after fetching and parsing, which matches the end-to-end scraper path.
+
+What it cleans:
+- trims text fields
+- converts `price` strings into `price_gbp` floats
+- converts rating words into numbers
+- converts relative book and image paths into absolute URLs
+- handles missing values with empty strings
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Cleaning is only integrated into the `scrape_url()` path, not `parse`.
+- No duplicate removal, CSV field update, Excel export, or pagination exists yet.
+
+Next recommended step:
+- Update CSV export to support Books records.

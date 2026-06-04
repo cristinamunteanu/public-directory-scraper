@@ -9,7 +9,7 @@ This project will scrape [Books to Scrape](https://books.toscrape.com/), a publi
 Planned v1 fields:
 
 - `title`
-- `price`
+- `price_gbp`
 - `availability`
 - `rating`
 - `book_url`
@@ -22,6 +22,7 @@ Planned v1 fields:
 ├── src/public_directory_scraper/
 │   ├── __init__.py
 │   ├── __main__.py
+│   ├── cleaner.py
 │   ├── exporter.py
 │   ├── fetcher.py
 │   ├── parser.py
@@ -32,6 +33,7 @@ Planned v1 fields:
 │   │   ├── listings.html
 │   │   └── simple_listing.html
 │   ├── test_books_fixture.py
+│   ├── test_cleaner.py
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
@@ -103,3 +105,5 @@ Fetch and parse one URL:
 ```
 
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
+
+Books cleaning note: scraped Books records normalize `price` into `price_gbp`, convert rating words to numbers, trim text fields, and turn relative book/image paths into absolute URLs.
