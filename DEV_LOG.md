@@ -303,3 +303,32 @@ Known limitations:
 
 Next recommended step:
 - Update CSV export to support Books records.
+
+## 2026-06-05
+
+Updated CSV export to support Books records.
+
+Why this structure:
+- CSV headers are inferred from record keys in first-seen order.
+- Legacy `name,url` records still write the same CSV shape.
+- Books parser records can now be written to CSV without changing parser output.
+
+Important tradeoffs:
+- This supports `parse books_page.html --output books.csv`.
+- It does not add `scrape URL --output` yet.
+- Books CSV from `parse` is raw parser output, not cleaned `scrape_url()` output.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html --output /tmp/books.csv
+```
+
+Known limitations:
+- Scraped Books records cannot be written directly with `scrape --output` yet.
+- Excel export and pagination are still not implemented.
+
+Next recommended step:
+- Add `scrape URL --output results.csv`.

@@ -207,6 +207,47 @@ class CliEntrypointTest(unittest.TestCase):
             ],
         )
 
+    def test_parse_command_writes_books_csv(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "books.csv"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "parse",
+                    str(FIXTURES_DIR / "books_page.html"),
+                    "--output",
+                    str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+            with output_path.open(encoding="utf-8", newline="") as csv_file:
+                reader = csv.DictReader(csv_file)
+                fieldnames = reader.fieldnames
+                rows = list(reader)
+
+        self.assertEqual(result.stdout.strip(), f"Wrote 2 records to {output_path}")
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(
+            fieldnames,
+            ["title", "price", "availability", "rating", "book_url", "image_url"],
+        )
+        self.assertEqual(rows[0]["title"], "A Light in the Attic")
+        self.assertEqual(rows[0]["price"], "£51.77")
+        self.assertEqual(
+            rows[0]["book_url"],
+            "catalogue/a-light-in-the-attic_1000/index.html",
+        )
+
     def test_parse_command_reports_missing_file(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

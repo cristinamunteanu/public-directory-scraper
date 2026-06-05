@@ -90,6 +90,12 @@ Save parsed listings to CSV:
 PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/listings.html --output listings.csv
 ```
 
+Save parsed Books records to CSV:
+
+```bash
+.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html --output books.csv
+```
+
 If the input file is missing or does not contain a valid listing, the command prints an `Error:` message to stderr and exits with a non-zero status.
 
 Fetch one URL:
@@ -107,3 +113,5 @@ Fetch and parse one URL:
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
 
 Books cleaning note: scraped Books records normalize `price` into `price_gbp`, convert rating words to numbers, trim text fields, and turn relative book/image paths into absolute URLs.
+
+CSV note: CSV headers are inferred from record fields, so both legacy `name,url` records and Books records can be written.
