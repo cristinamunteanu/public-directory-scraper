@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .exporter import write_records_csv
+from .exporter import write_records
 from .fetcher import fetch_url
 from .parser import parse_listings
 from .scraper import scrape_url
@@ -38,7 +38,7 @@ def main(argv=None) -> int:
                 return 1
 
             if len(args) == 4 and args[2] == "--output":
-                count = write_records_csv(records, args[3])
+                count = write_records(records, args[3])
                 print(f"Wrote {count} records to {args[3]}")
                 return 0
 
@@ -66,7 +66,7 @@ def main(argv=None) -> int:
                 return 1
 
             if len(args) == 4 and args[2] == "--output":
-                count = write_records_csv(records, args[3])
+                count = write_records(records, args[3])
                 print(f"Wrote {count} records to {args[3]}")
                 return 0
 
@@ -76,8 +76,8 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL | scrape URL [--output OUTPUT.csv] | "
-            "parse HTML_FILE [--output OUTPUT.csv]]"
+            "[fetch URL | scrape URL [--output OUTPUT.csv|OUTPUT.xlsx] | "
+            "parse HTML_FILE [--output OUTPUT.csv|OUTPUT.xlsx]]"
         )
         print(usage, file=sys.stderr)
         return 2

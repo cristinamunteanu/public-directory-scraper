@@ -116,8 +116,14 @@ Fetch, parse, clean, and save Books records to CSV:
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.csv
 ```
 
+Save scraped Books records to Excel:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.xlsx
+```
+
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
 
 Books cleaning note: scraped Books records normalize `price` into `price_gbp`, convert rating words to numbers, trim text fields, and turn relative book/image paths into absolute URLs.
 
-CSV note: CSV headers are inferred from record fields, so both legacy `name,url` records and Books records can be written.
+Output note: CSV and Excel headers are inferred from record fields, so both legacy `name,url` records and Books records can be written.

@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from openpyxl import load_workbook
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures"
 
@@ -203,6 +205,43 @@ class CliEntrypointTest(unittest.TestCase):
         self.assertEqual(rows[0]["price_gbp"], "51.77")
         self.assertEqual(rows[0]["rating"], "3")
         self.assertTrue(rows[0]["book_url"].startswith("file://"))
+
+    def test_scrape_command_writes_books_excel(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "books.xlsx"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "scrape",
+                    (FIXTURES_DIR / "books_page.html").as_uri(),
+                    "--output",
+                    str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+            workbook = load_workbook(output_path)
+            sheet = workbook.active
+            rows = list(sheet.iter_rows(values_only=True))
+
+        self.assertEqual(result.stdout.strip(), f"Wrote 2 records to {output_path}")
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(
+            rows[0],
+            ("title", "price_gbp", "availability", "rating", "book_url", "image_url"),
+        )
+        self.assertEqual(rows[1][0], "A Light in the Attic")
+        self.assertEqual(rows[1][1], 51.77)
+        self.assertEqual(rows[1][3], 3)
 
     def test_parse_command_writes_listing_csv(self):
         env = os.environ.copy()

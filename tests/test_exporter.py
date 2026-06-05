@@ -3,7 +3,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from public_directory_scraper.exporter import write_records_csv
+from openpyxl import load_workbook
+
+from public_directory_scraper.exporter import write_records, write_records_excel
 
 
 class WriteRecordsCsvTest(unittest.TestCase):
@@ -16,7 +18,7 @@ class WriteRecordsCsvTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "listings.csv"
 
-            count = write_records_csv(records, output_path)
+            count = write_records(records, output_path)
 
             with output_path.open(encoding="utf-8", newline="") as csv_file:
                 rows = list(csv.DictReader(csv_file))
@@ -39,7 +41,7 @@ class WriteRecordsCsvTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "books.csv"
 
-            count = write_records_csv(records, output_path)
+            count = write_records(records, output_path)
 
             with output_path.open(encoding="utf-8", newline="") as csv_file:
                 reader = csv.DictReader(csv_file)
@@ -52,6 +54,40 @@ class WriteRecordsCsvTest(unittest.TestCase):
             ["title", "price", "availability", "rating", "book_url", "image_url"],
         )
         self.assertEqual(rows, records)
+
+    def test_writes_records_to_excel(self):
+        records = [
+            {
+                "title": "A Light in the Attic",
+                "price_gbp": 51.77,
+                "availability": "In stock",
+            }
+        ]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "books.xlsx"
+
+            count = write_records_excel(records, output_path)
+
+            workbook = load_workbook(output_path)
+            sheet = workbook.active
+            rows = list(sheet.iter_rows(values_only=True))
+
+        self.assertEqual(count, 1)
+        self.assertEqual(
+            rows,
+            [
+                ("title", "price_gbp", "availability"),
+                ("A Light in the Attic", 51.77, "In stock"),
+            ],
+        )
+
+    def test_rejects_unknown_output_extension(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "books.txt"
+
+            with self.assertRaisesRegex(ValueError, "output file must end"):
+                write_records([], output_path)
 
 
 if __name__ == "__main__":

@@ -356,3 +356,32 @@ Known limitations:
 
 Next recommended step:
 - Add Excel export or pagination, depending on which deliverable requirement should come first.
+
+## 2026-06-05
+
+Added Excel export support.
+
+Why this structure:
+- `write_records()` dispatches output based on the file extension.
+- `.csv` output keeps using the standard-library CSV writer.
+- `.xlsx` output uses `openpyxl` and writes one sheet named `records`.
+- Existing `parse --output` and `scrape --output` commands can now write CSV or Excel files.
+
+Important tradeoffs:
+- Excel output is intentionally plain: no styling, filters, widths, or multiple sheets.
+- Unsupported output extensions fail with a clear `ValueError`.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output /tmp/books.xlsx
+```
+
+Known limitations:
+- Pagination is still not implemented.
+- README does not yet include screenshots or final sample output.
+
+Next recommended step:
+- Add pagination or final README deliverable polish.
