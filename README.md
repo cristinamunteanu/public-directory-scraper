@@ -110,6 +110,12 @@ Fetch and parse one URL:
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
 ```
 
+Fetch, parse, clean, and save Books records to CSV:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.csv
+```
+
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
 
 Books cleaning note: scraped Books records normalize `price` into `price_gbp`, convert rating words to numbers, trim text fields, and turn relative book/image paths into absolute URLs.

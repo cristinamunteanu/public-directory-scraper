@@ -332,3 +332,27 @@ Known limitations:
 
 Next recommended step:
 - Add `scrape URL --output results.csv`.
+
+## 2026-06-05
+
+Added CSV output for scraped pages.
+
+Why this structure:
+- The `scrape` command now mirrors the existing `parse --output` option.
+- It reuses `scrape_url()` for fetching, parsing, and Books cleaning.
+- It reuses `write_records_csv()` for output, so no new export path was added.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output /tmp/books.csv
+```
+
+Known limitations:
+- Only CSV output is supported.
+- Excel export and pagination are still not implemented.
+
+Next recommended step:
+- Add Excel export or pagination, depending on which deliverable requirement should come first.

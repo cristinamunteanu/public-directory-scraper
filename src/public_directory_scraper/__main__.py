@@ -28,7 +28,7 @@ def main(argv=None) -> int:
             print(f"bytes: {len(result.body)}")
             return 0
 
-        if command == "scrape" and len(args) == 2:
+        if command == "scrape" and len(args) in {2, 4}:
             url = args[1]
 
             try:
@@ -37,8 +37,14 @@ def main(argv=None) -> int:
                 print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
                 return 1
 
-            print(json.dumps(records))
-            return 0
+            if len(args) == 4 and args[2] == "--output":
+                count = write_records_csv(records, args[3])
+                print(f"Wrote {count} records to {args[3]}")
+                return 0
+
+            if len(args) == 2:
+                print(json.dumps(records))
+                return 0
 
         if command == "parse" and len(args) in {2, 4}:
             input_path = args[1]
@@ -70,7 +76,8 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL | scrape URL | parse HTML_FILE [--output OUTPUT.csv]]"
+            "[fetch URL | scrape URL [--output OUTPUT.csv] | "
+            "parse HTML_FILE [--output OUTPUT.csv]]"
         )
         print(usage, file=sys.stderr)
         return 2
