@@ -438,3 +438,31 @@ Known limitations:
 
 Next recommended step:
 - Add final README sample output and output-file screenshots.
+
+## 2026-06-07
+
+Added a checked-in sample CSV output and README sample-output section.
+
+Why this structure:
+- `sample_outputs/books_sample.csv` gives the repo a visible output artifact.
+- The README shows a compact preview table instead of requiring readers to open the CSV first.
+- Limitations are now grouped in a dedicated README section.
+
+Important tradeoffs:
+- The sample uses target-site-style URLs so it stays portable across machines.
+- Output screenshots are left for a separate slice.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output /tmp/books.csv
+```
+
+Known limitations:
+- The sample CSV is static and should be refreshed if output fields change.
+- README screenshots are still missing.
+
+Next recommended step:
+- Add a small screenshot asset showing the generated output file.

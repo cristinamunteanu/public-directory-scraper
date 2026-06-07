@@ -42,6 +42,8 @@ Planned v1 fields:
 │   ├── test_parser.py
 │   ├── test_scraper.py
 │   └── test_import.py
+├── sample_outputs/
+│   └── books_sample.csv
 ├── pyproject.toml
 ├── README.md
 └── DEV_LOG.md
@@ -129,6 +131,33 @@ Save scraped Books records to Excel:
 ```bash
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.xlsx
 ```
+
+## Sample Output
+
+The checked-in sample output is available at `sample_outputs/books_sample.csv`.
+
+Generate a comparable CSV from the local two-page fixture:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
+```
+
+Preview:
+
+| title | price_gbp | availability | rating |
+| --- | ---: | --- | ---: |
+| A Light in the Attic | 51.77 | In stock | 3 |
+| Tipping the Velvet | 53.74 | In stock | 1 |
+| The Republic | 33.78 | In stock | 4 |
+
+The full CSV also includes `book_url` and `image_url`.
+
+## Limitations
+
+- The parser is tailored to Books to Scrape listing pages.
+- Pagination is limited by the `--pages` value.
+- There is no crawl delay, retry policy, or live-site change detection yet.
+- Output screenshots are not included yet.
 
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
 
