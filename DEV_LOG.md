@@ -520,3 +520,29 @@ Known limitations:
 
 Next recommended step:
 - Run one live scrape check when network access is available.
+
+## 2026-06-07
+
+Ignored root-level generated output files.
+
+Why this structure:
+- Root-level `.csv` and `.xlsx` files are common manual scraper outputs.
+- The ignore rules are root-only, so checked-in samples under `sample_outputs/` remain trackable.
+
+Important tradeoffs:
+- Existing generated files are not deleted.
+- Output files in subdirectories can still be committed deliberately.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+git status --short
+```
+
+Known limitations:
+- This does not clean up any local generated files.
+
+Next recommended step:
+- Run one live scrape check when network access is available.
