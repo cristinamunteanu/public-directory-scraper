@@ -44,6 +44,9 @@ Planned v1 fields:
 │   └── test_import.py
 ├── sample_outputs/
 │   └── books_sample.csv
+├── docs/
+│   └── screenshots/
+│       └── books-output.svg
 ├── pyproject.toml
 ├── README.md
 └── DEV_LOG.md
@@ -152,12 +155,16 @@ Preview:
 
 The full CSV also includes `book_url` and `image_url`.
 
+Screenshot:
+
+![Books scraper CSV output preview](docs/screenshots/books-output.svg)
+
 ## Limitations
 
 - The parser is tailored to Books to Scrape listing pages.
 - Pagination is limited by the `--pages` value.
 - There is no crawl delay, retry policy, or live-site change detection yet.
-- Output screenshots are not included yet.
+- The screenshot is a static preview of the sample output.
 
 Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
 

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+  <title id="title">Books scraper CSV output preview</title>
+  <desc id="desc">A spreadsheet-style preview of scraped Books to Scrape output with title, price, availability, rating, book URL, and image URL columns.</desc>
+  <rect width="960" height="360" fill="#f4f6f8"/>
+  <rect x="32" y="28" width="896" height="304" rx="6" fill="#ffffff" stroke="#c9d1d9"/>
+  <rect x="32" y="28" width="896" height="42" rx="6" fill="#24292f"/>
+  <text x="52" y="55" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="700">books_sample.csv</text>
+
+  <g font-family="Arial, sans-serif" font-size="13">
+    <rect x="52" y="96" width="860" height="34" fill="#eef2f5" stroke="#d0d7de"/>
+    <text x="64" y="118" fill="#24292f" font-weight="700">title</text>
+    <text x="254" y="118" fill="#24292f" font-weight="700">price_gbp</text>
+    <text x="354" y="118" fill="#24292f" font-weight="700">availability</text>
+    <text x="474" y="118" fill="#24292f" font-weight="700">rating</text>
+    <text x="554" y="118" fill="#24292f" font-weight="700">book_url</text>
+    <text x="754" y="118" fill="#24292f" font-weight="700">image_url</text>
+
+    <rect x="52" y="130" width="860" height="46" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="64" y="158" fill="#24292f">A Light in the Attic</text>
+    <text x="254" y="158" fill="#24292f">51.77</text>
+    <text x="354" y="158" fill="#24292f">In stock</text>
+    <text x="474" y="158" fill="#24292f">3</text>
+    <text x="554" y="158" fill="#57606a">.../a-light-in-the-attic_1000/</text>
+    <text x="754" y="158" fill="#57606a">.../2cdad67c44b0.jpg</text>
+
+    <rect x="52" y="176" width="860" height="46" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="64" y="204" fill="#24292f">Tipping the Velvet</text>
+    <text x="254" y="204" fill="#24292f">53.74</text>
+    <text x="354" y="204" fill="#24292f">In stock</text>
+    <text x="474" y="204" fill="#24292f">1</text>
+    <text x="554" y="204" fill="#57606a">.../tipping-the-velvet_999/</text>
+    <text x="754" y="204" fill="#57606a">.../260c6ae16bce.jpg</text>
+
+    <rect x="52" y="222" width="860" height="46" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="64" y="250" fill="#24292f">The Republic</text>
+    <text x="254" y="250" fill="#24292f">33.78</text>
+    <text x="354" y="250" fill="#24292f">In stock</text>
+    <text x="474" y="250" fill="#24292f">4</text>
+    <text x="554" y="250" fill="#57606a">.../the-republic_998/</text>
+    <text x="754" y="250" fill="#57606a">.../republic.jpg</text>
+  </g>
+
+  <text x="52" y="304" fill="#57606a" font-family="Arial, sans-serif" font-size="13">Sample output generated from the local two-page Books to Scrape fixture.</text>
+</svg>

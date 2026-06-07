@@ -466,3 +466,30 @@ Known limitations:
 
 Next recommended step:
 - Add a small screenshot asset showing the generated output file.
+
+## 2026-06-07
+
+Added a README screenshot asset for the sample output.
+
+Why this structure:
+- `docs/screenshots/books-output.svg` is small, readable, and renders directly in GitHub.
+- The screenshot preview is documentation-only, so it does not affect scraper behavior.
+- The README now links the sample CSV and shows the visual output shape.
+
+Important tradeoffs:
+- The screenshot is a static preview, not generated automatically from the CSV.
+- No code or dependency changes were made in this slice.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The screenshot should be refreshed if output fields change.
+- A live scrape command still depends on network access.
+
+Next recommended step:
+- Do a final README pass for portfolio readiness.
