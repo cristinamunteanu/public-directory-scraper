@@ -1,12 +1,14 @@
 # Public Directory Scraper
 
-Minimal Python project structure for developing a public directory scraper in small, testable steps.
+A small Python scraper that collects book listing data from [Books to Scrape](https://books.toscrape.com/), cleans the records, and saves them to CSV or Excel.
 
-## Target
+Books to Scrape is a public sandbox website built for scraping practice.
 
-This project will scrape [Books to Scrape](https://books.toscrape.com/), a public sandbox website built for scraping practice.
+## What It Scrapes
 
-Planned v1 fields:
+The scraper extracts book cards from listing pages.
+
+Fields:
 
 - `title`
 - `price_gbp`
@@ -14,6 +16,75 @@ Planned v1 fields:
 - `rating`
 - `book_url`
 - `image_url`
+
+The scraper can follow pagination with `--pages N`, remove duplicate books by `book_url`, and write output files with `.csv` or `.xlsx` extensions.
+
+## How To Run
+
+Create a virtual environment and install the project:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e ".[dev]"
+```
+
+Run against the live site:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --output books.csv
+```
+
+Save Excel output instead:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --output books.xlsx
+```
+
+Run against the local fixture without internet access:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
+```
+
+## Sample Output
+
+The checked-in sample output is available at [sample_outputs/books_sample.csv](sample_outputs/books_sample.csv).
+
+Preview:
+
+| title | price_gbp | availability | rating |
+| --- | ---: | --- | ---: |
+| A Light in the Attic | 51.77 | In stock | 3 |
+| Tipping the Velvet | 53.74 | In stock | 1 |
+| The Republic | 33.78 | In stock | 4 |
+
+The full CSV also includes `book_url` and `image_url`.
+
+Screenshot:
+
+![Books scraper CSV output preview](docs/screenshots/books-output.svg)
+
+## Development
+
+Run tests:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+```
+
+Run linting:
+
+```bash
+.venv/bin/ruff check src tests
+```
+
+Useful local commands:
+
+```bash
+.venv/bin/python -m public_directory_scraper
+.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
+.venv/bin/python -m public_directory_scraper fetch https://books.toscrape.com/
+```
 
 ## Project Layout
 
@@ -52,112 +123,14 @@ Planned v1 fields:
 └── DEV_LOG.md
 ```
 
-## Development
+## How It Works
 
-Create a virtual environment and install the package in editable mode:
-
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -e .
-```
-
-Run the current test suite:
-
-```bash
-.venv/bin/python -m unittest discover -s tests
-```
-
-Run linting:
-
-```bash
-.venv/bin/ruff check src tests
-```
-
-Run the package entrypoint:
-
-```bash
-PYTHONPATH=src .venv/bin/python -m public_directory_scraper
-```
-
-Parse saved HTML listings:
-
-```bash
-PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/listings.html
-```
-
-Parse the Books to Scrape fixture:
-
-```bash
-.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
-```
-
-Save parsed listings to CSV:
-
-```bash
-PYTHONPATH=src .venv/bin/python -m public_directory_scraper parse tests/fixtures/listings.html --output listings.csv
-```
-
-Save parsed Books records to CSV:
-
-```bash
-.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html --output books.csv
-```
-
-If the input file is missing or does not contain a valid listing, the command prints an `Error:` message to stderr and exits with a non-zero status.
-
-Fetch one URL:
-
-```bash
-.venv/bin/python -m public_directory_scraper fetch https://example.com
-```
-
-Fetch and parse one URL:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/listings.html
-```
-
-Fetch, parse, clean, and save Books records to CSV:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.csv
-```
-
-Fetch and parse a limited number of paginated Books pages:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
-```
-
-Save scraped Books records to Excel:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.xlsx
-```
-
-## Sample Output
-
-The checked-in sample output is available at `sample_outputs/books_sample.csv`.
-
-Generate a comparable CSV from the local two-page fixture:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
-```
-
-Preview:
-
-| title | price_gbp | availability | rating |
-| --- | ---: | --- | ---: |
-| A Light in the Attic | 51.77 | In stock | 3 |
-| Tipping the Velvet | 53.74 | In stock | 1 |
-| The Republic | 33.78 | In stock | 4 |
-
-The full CSV also includes `book_url` and `image_url`.
-
-Screenshot:
-
-![Books scraper CSV output preview](docs/screenshots/books-output.svg)
+- `fetcher.py` downloads one page.
+- `parser.py` extracts raw listing records from HTML.
+- `cleaner.py` normalizes prices, ratings, text, URLs, and duplicates.
+- `scraper.py` connects fetching, parsing, cleaning, and pagination.
+- `exporter.py` writes records to CSV or Excel.
+- `__main__.py` exposes the command-line interface.
 
 ## Limitations
 
@@ -165,9 +138,4 @@ Screenshot:
 - Pagination is limited by the `--pages` value.
 - There is no crawl delay, retry policy, or live-site change detection yet.
 - The screenshot is a static preview of the sample output.
-
-Books to Scrape fixture note: `tests/fixtures/books_page.html` contains a compact representative page with two `product_pod` book cards and pagination markup. The parser extracts the planned v1 book fields from this fixture.
-
-Books cleaning note: scraped Books records normalize `price` into `price_gbp`, convert rating words to numbers, trim text fields, and turn relative book/image paths into absolute URLs.
-
-Output note: CSV and Excel headers are inferred from record fields, so both legacy `name,url` records and Books records can be written.
+- The sample CSV is static and should be refreshed if output fields change.

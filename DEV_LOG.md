@@ -493,3 +493,30 @@ Known limitations:
 
 Next recommended step:
 - Do a final README pass for portfolio readiness.
+
+## 2026-06-07
+
+Polished the README for portfolio readiness.
+
+Why this structure:
+- The README now starts with the finished scraper behavior instead of the project skeleton.
+- Run commands focus on the real target site, with a local fixture command for offline checks.
+- Project structure and module responsibilities are still documented for inspection.
+
+Important tradeoffs:
+- No implementation behavior changed in this slice.
+- Live-site commands are documented but not required for the test suite.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The live scrape command depends on network access.
+- The screenshot and sample CSV are static documentation assets.
+
+Next recommended step:
+- Run one live scrape check when network access is available.
