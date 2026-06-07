@@ -119,6 +119,47 @@ class ScrapeUrlTest(unittest.TestCase):
             "https://books.toscrape.com/catalogue/page-2.html",
         )
 
+    def test_removes_duplicate_books_across_pages(self):
+        first_page = b"""
+        <article class="product_pod">
+          <p class="star-rating Three"></p>
+          <h3>
+            <a href="book_1/index.html" title="First Book">Book</a>
+          </h3>
+          <img src="media/cache/first.jpg">
+          <p class="price_color">\xc2\xa351.77</p>
+          <p class="instock availability">In stock</p>
+        </article>
+        <ul class="pager">
+          <li class="next"><a href="page-2.html">next</a></li>
+        </ul>
+        """
+        second_page = b"""
+        <article class="product_pod">
+          <p class="star-rating Four"></p>
+          <h3>
+            <a href="book_1/index.html" title="Duplicate Book">Book</a>
+          </h3>
+          <img src="media/cache/duplicate.jpg">
+          <p class="price_color">\xc2\xa333.78</p>
+          <p class="instock availability">In stock</p>
+        </article>
+        """
+
+        with patch("public_directory_scraper.scraper.fetch_url") as fetch_url:
+            fetch_url.side_effect = [
+                FetchResult(status_code=200, reason="OK", body=first_page),
+                FetchResult(status_code=200, reason="OK", body=second_page),
+            ]
+
+            records = scrape_pages(
+                "https://books.toscrape.com/catalogue/page-1.html",
+                max_pages=2,
+            )
+
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["title"], "First Book")
+
     def test_rejects_page_limit_below_one(self):
         with self.assertRaisesRegex(ValueError, "pages must be at least 1"):
             scrape_pages("https://books.toscrape.com/", max_pages=0)

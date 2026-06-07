@@ -411,3 +411,30 @@ Known limitations:
 
 Next recommended step:
 - Add duplicate removal or final README deliverable polish.
+
+## 2026-06-07
+
+Added duplicate removal for scraped Books records.
+
+Why this structure:
+- `deduplicate_records()` keeps duplicate handling in the cleaning layer.
+- `scrape_pages()` removes duplicates after collecting records from all requested pages.
+- The first record wins, which keeps output deterministic and easy to inspect.
+
+Important tradeoffs:
+- Duplicates are identified by non-empty `book_url` values only.
+- Records with missing `book_url` values are kept instead of being silently dropped.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is no crawl delay or retry policy yet.
+- The final README still needs sample output and screenshots.
+
+Next recommended step:
+- Add final README sample output and output-file screenshots.

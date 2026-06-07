@@ -1,4 +1,4 @@
-from .cleaner import clean_books_records
+from .cleaner import clean_books_records, deduplicate_records
 from .fetcher import fetch_url
 from .parser import parse_listings, parse_next_page_url
 
@@ -32,4 +32,4 @@ def scrape_pages(url, max_pages=1):
 
         current_url = next_url
 
-    return records
+    return deduplicate_records(records, key="book_url")
