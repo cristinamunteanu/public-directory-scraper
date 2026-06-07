@@ -385,3 +385,29 @@ Known limitations:
 
 Next recommended step:
 - Add pagination or final README deliverable polish.
+
+## 2026-06-05
+
+Added limited pagination for scraped Books pages.
+
+Why this structure:
+- `parse_next_page_url()` extracts the Books pagination `next` link.
+- `scrape_pages()` follows next links up to a caller-provided page limit.
+- The CLI supports `scrape URL --pages N` and can combine it with `--output`.
+- Tests use local fixtures, including `tests/fixtures/catalogue/page-2.html`, so pagination checks do not depend on live network access.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output /tmp/books.csv
+```
+
+Known limitations:
+- Pagination is capped by the user-provided `--pages` value.
+- There is no crawl delay, retry policy, or duplicate removal yet.
+- The final README still needs sample output and screenshots.
+
+Next recommended step:
+- Add duplicate removal or final README deliverable polish.

@@ -30,6 +30,8 @@ Planned v1 fields:
 ├── tests/
 │   ├── fixtures/
 │   │   ├── books_page.html
+│   │   ├── catalogue/
+│   │   │   └── page-2.html
 │   │   ├── listings.html
 │   │   └── simple_listing.html
 │   ├── test_books_fixture.py
@@ -114,6 +116,12 @@ Fetch, parse, clean, and save Books records to CSV:
 
 ```bash
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output books.csv
+```
+
+Fetch and parse a limited number of paginated Books pages:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
 ```
 
 Save scraped Books records to Excel:

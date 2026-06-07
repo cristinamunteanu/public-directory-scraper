@@ -1,7 +1,11 @@
 import unittest
 from pathlib import Path
 
-from public_directory_scraper.parser import parse_listing, parse_listings
+from public_directory_scraper.parser import (
+    parse_listing,
+    parse_listings,
+    parse_next_page_url,
+)
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -71,6 +75,26 @@ class ParseListingTest(unittest.TestCase):
                 },
             ],
         )
+
+    def test_parses_books_next_page_url(self):
+        html = (FIXTURES_DIR / "books_page.html").read_text(encoding="utf-8")
+
+        next_page_url = parse_next_page_url(
+            html,
+            "https://books.toscrape.com/index.html",
+        )
+
+        self.assertEqual(
+            next_page_url,
+            "https://books.toscrape.com/catalogue/page-2.html",
+        )
+
+    def test_returns_empty_next_page_url_without_next_link(self):
+        html = (FIXTURES_DIR / "catalogue" / "page-2.html").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(parse_next_page_url(html, "https://books.toscrape.com/"), "")
 
     def test_requires_name_and_url(self):
         with self.assertRaisesRegex(ValueError, "listing must include name and url"):

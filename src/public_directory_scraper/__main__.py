@@ -6,7 +6,44 @@ from . import __version__
 from .exporter import write_records
 from .fetcher import fetch_url
 from .parser import parse_listings
-from .scraper import scrape_url
+from .scraper import scrape_pages
+
+
+def _parse_scrape_options(options):
+    """Parse scrape-only options and return page limit plus output path."""
+    max_pages = 1
+    output_path = None
+    index = 0
+
+    while index < len(options):
+        option = options[index]
+
+        if option == "--pages":
+            if index + 1 >= len(options):
+                raise ValueError("--pages requires a value")
+
+            try:
+                max_pages = int(options[index + 1])
+            except ValueError as error:
+                raise ValueError("--pages must be a positive integer") from error
+
+            if max_pages < 1:
+                raise ValueError("--pages must be a positive integer")
+
+            index += 2
+            continue
+
+        if option == "--output":
+            if index + 1 >= len(options):
+                raise ValueError("--output requires a path")
+
+            output_path = options[index + 1]
+            index += 2
+            continue
+
+        raise ValueError(f"unknown scrape option: {option}")
+
+    return max_pages, output_path
 
 
 def main(argv=None) -> int:
@@ -28,23 +65,33 @@ def main(argv=None) -> int:
             print(f"bytes: {len(result.body)}")
             return 0
 
-        if command == "scrape" and len(args) in {2, 4}:
+        if command == "scrape" and len(args) >= 2:
             url = args[1]
 
             try:
-                records = scrape_url(url)
+                max_pages, output_path = _parse_scrape_options(args[2:])
+            except ValueError as error:
+                print(f"Error: {error}", file=sys.stderr)
+                return 2
+
+            try:
+                records = scrape_pages(url, max_pages=max_pages)
             except (OSError, ValueError) as error:
                 print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
                 return 1
 
-            if len(args) == 4 and args[2] == "--output":
-                count = write_records(records, args[3])
-                print(f"Wrote {count} records to {args[3]}")
+            if output_path is not None:
+                try:
+                    count = write_records(records, output_path)
+                except ValueError as error:
+                    print(f"Error: {error}", file=sys.stderr)
+                    return 2
+
+                print(f"Wrote {count} records to {output_path}")
                 return 0
 
-            if len(args) == 2:
-                print(json.dumps(records))
-                return 0
+            print(json.dumps(records))
+            return 0
 
         if command == "parse" and len(args) in {2, 4}:
             input_path = args[1]
@@ -61,12 +108,17 @@ def main(argv=None) -> int:
                     file=sys.stderr,
                 )
                 return 1
-            except ValueError as error:
+            except (OSError, ValueError) as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 1
 
             if len(args) == 4 and args[2] == "--output":
-                count = write_records(records, args[3])
+                try:
+                    count = write_records(records, args[3])
+                except ValueError as error:
+                    print(f"Error: {error}", file=sys.stderr)
+                    return 2
+
                 print(f"Wrote {count} records to {args[3]}")
                 return 0
 
@@ -76,7 +128,7 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL | scrape URL [--output OUTPUT.csv|OUTPUT.xlsx] | "
+            "[fetch URL | scrape URL [--pages N] [--output OUTPUT.csv|OUTPUT.xlsx] | "
             "parse HTML_FILE [--output OUTPUT.csv|OUTPUT.xlsx]]"
         )
         print(usage, file=sys.stderr)

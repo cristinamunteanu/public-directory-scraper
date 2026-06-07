@@ -243,6 +243,41 @@ class CliEntrypointTest(unittest.TestCase):
         self.assertEqual(rows[1][1], 51.77)
         self.assertEqual(rows[1][3], 3)
 
+    def test_scrape_command_follows_pages_and_writes_books_csv(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "books.csv"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "scrape",
+                    (FIXTURES_DIR / "books_page.html").as_uri(),
+                    "--pages",
+                    "2",
+                    "--output",
+                    str(output_path),
+                ],
+                check=True,
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+            with output_path.open(encoding="utf-8", newline="") as csv_file:
+                rows = list(csv.DictReader(csv_file))
+
+        self.assertEqual(result.stdout.strip(), f"Wrote 3 records to {output_path}")
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[2]["title"], "The Republic")
+        self.assertEqual(rows[2]["price_gbp"], "33.78")
+        self.assertEqual(rows[2]["rating"], "4")
+
     def test_parse_command_writes_listing_csv(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

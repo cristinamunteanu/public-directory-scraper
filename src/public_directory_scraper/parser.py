@@ -1,4 +1,5 @@
 from html.parser import HTMLParser
+from urllib.parse import urljoin
 
 
 class _ListingsParser(HTMLParser):
@@ -163,6 +164,33 @@ class _BooksParser(HTMLParser):
         self._current_book = None
 
 
+class _NextPageParser(HTMLParser):
+    """Find the href inside a Books to Scrape pagination next item."""
+
+    def __init__(self):
+        """Prepare parser state for finding one next-page link."""
+        super().__init__()
+        self._inside_next = False
+        self.next_page_url = ""
+
+    def handle_starttag(self, tag, attrs):
+        """Capture the first link inside a next pagination list item."""
+        attrs_by_name = dict(attrs)
+        classes = attrs_by_name.get("class", "").split()
+
+        if tag == "li" and "next" in classes:
+            self._inside_next = True
+            return
+
+        if tag == "a" and self._inside_next and not self.next_page_url:
+            self.next_page_url = attrs_by_name.get("href", "").strip()
+
+    def handle_endtag(self, tag):
+        """Leave next-link mode when the pagination list item closes."""
+        if tag == "li" and self._inside_next:
+            self._inside_next = False
+
+
 def _normalize_space(parts):
     """Collapse whitespace from a list of text parts."""
     return " ".join(part.strip() for part in parts if part.strip())
@@ -207,3 +235,15 @@ def _parse_books(html):
 def parse_listing(html):
     """Parse HTML and return the first listing record."""
     return parse_listings(html)[0]
+
+
+def parse_next_page_url(html, base_url):
+    """Return the absolute next-page URL from Books pagination, if present."""
+    parser = _NextPageParser()
+    parser.feed(html)
+    parser.close()
+
+    if not parser.next_page_url:
+        return ""
+
+    return urljoin(base_url, parser.next_page_url)
