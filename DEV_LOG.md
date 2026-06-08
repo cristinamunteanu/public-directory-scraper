@@ -741,3 +741,28 @@ Known limitations:
 
 Next recommended step:
 - Update README limitations and command examples for timeout, delay, and retries.
+
+## 2026-06-08
+
+Updated README retry and delay documentation.
+
+Why this structure:
+- The README now lists timeout, retries, and delay in the main run examples.
+- Limitations no longer claim crawl delay or retry support is missing.
+- Remaining limitations describe the current behavior: fixed delay and immediate retries.
+
+Important tradeoffs:
+- This is documentation-only; no code behavior changed.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- README examples still use small page counts for portfolio-friendly runs.
+
+Next recommended step:
+- Re-review the remaining findings and choose the next small fix.

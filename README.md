@@ -17,7 +17,7 @@ Fields:
 - `book_url`
 - `image_url`
 
-The scraper can follow pagination with `--pages N`, remove duplicate books by `book_url`, and write output files with `.csv` or `.xlsx` extensions.
+The scraper can follow pagination with `--pages N`, retry temporary fetch failures with `--retries N`, pause between paginated requests with `--delay SECONDS`, remove duplicate books by `book_url`, and write output files with `.csv` or `.xlsx` extensions.
 
 ## How To Run
 
@@ -31,19 +31,25 @@ python3 -m venv .venv
 Run against the live site:
 
 ```bash
-.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --output books.csv
+.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --timeout 10 --retries 1 --delay 1 --output books.csv
 ```
 
 Save Excel output instead:
 
 ```bash
-.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --output books.xlsx
+.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --timeout 10 --retries 1 --delay 1 --output books.xlsx
 ```
 
 Run against the local fixture without internet access:
 
 ```bash
 .venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
+```
+
+Fetch a single page with retry and timeout options:
+
+```bash
+.venv/bin/python -m public_directory_scraper fetch https://books.toscrape.com/ --timeout 10 --retries 1
 ```
 
 ## Sample Output
@@ -136,6 +142,8 @@ Useful local commands:
 
 - The parser is tailored to Books to Scrape listing pages.
 - Pagination is limited by the `--pages` value.
-- There is no crawl delay, retry policy, or live-site change detection yet.
+- Retries are immediate; there is no exponential backoff.
+- Crawl delay is fixed between paginated requests.
+- There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.
