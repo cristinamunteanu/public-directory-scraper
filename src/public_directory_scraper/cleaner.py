@@ -60,9 +60,12 @@ def _clean_text(value):
 
 def _clean_price(value):
     """Convert a Books to Scrape price string like £51.77 into a float."""
-    text = _clean_text(value).replace("£", "")
+    text = _clean_text(value).replace("£", "").replace(",", "")
 
     if not text:
         return ""
 
-    return float(text)
+    try:
+        return float(text)
+    except ValueError:
+        return ""

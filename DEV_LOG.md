@@ -792,3 +792,29 @@ Known limitations:
 
 Next recommended step:
 - Harden malformed price handling.
+
+## 2026-06-09
+
+Hardened Books price cleaning.
+
+Why this structure:
+- `_clean_price()` now accepts comma thousands separators.
+- Malformed price text returns an empty value instead of crashing the scrape.
+- Tests cover both comma-formatted and malformed prices.
+
+Important tradeoffs:
+- Malformed prices are treated as missing values rather than reported separately.
+- Currency handling remains tailored to the Books to Scrape pound price format.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is no separate warning or error report for malformed fields.
+
+Next recommended step:
+- Re-review remaining findings and decide whether URL safety needs a small local-only note or code restriction.

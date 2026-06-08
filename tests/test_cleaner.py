@@ -52,6 +52,16 @@ class CleanBooksRecordsTest(unittest.TestCase):
             ],
         )
 
+    def test_cleans_price_with_thousands_separator(self):
+        cleaned = clean_books_records([{"price": "£1,234.56"}])
+
+        self.assertEqual(cleaned[0]["price_gbp"], 1234.56)
+
+    def test_handles_malformed_price_without_crashing(self):
+        cleaned = clean_books_records([{"price": "Free"}])
+
+        self.assertEqual(cleaned[0]["price_gbp"], "")
+
 
 class DeduplicateRecordsTest(unittest.TestCase):
     def test_removes_duplicate_records_by_key(self):
