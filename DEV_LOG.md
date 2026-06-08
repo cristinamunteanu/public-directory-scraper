@@ -546,3 +546,62 @@ Known limitations:
 
 Next recommended step:
 - Run one live scrape check when network access is available.
+
+## 2026-06-08
+
+Ran a live scrape check against Books to Scrape.
+
+Why this structure:
+- The check uses the same command documented in the README.
+- Output was written to `/tmp` so no generated live output file is added to the repo.
+- The command fetched two pages and wrote 40 records.
+
+Command:
+
+```bash
+.venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --output /tmp/public-directory-scraper-live-check.csv
+```
+
+Important tradeoffs:
+- The live check depends on network access and the target site being available.
+- The test suite still uses local fixtures so normal validation remains deterministic.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is no crawl delay, retry policy, or live-site change detection yet.
+
+Next recommended step:
+- Consider the v1 portfolio scraper complete unless adding optional resilience features.
+
+## 2026-06-08
+
+Added core fetch retry support.
+
+Why this structure:
+- `fetch_url()` now accepts `retries` while keeping the default at zero extra attempts.
+- Retry behavior lives in the fetcher layer, where network errors happen.
+- The CLI is unchanged so this slice stays small and easy to inspect.
+
+Important tradeoffs:
+- Retries happen immediately without backoff or delay.
+- The retry option is available to code callers but is not exposed as a CLI flag yet.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is no `--retries` CLI option yet.
+- There is no crawl delay or backoff yet.
+
+Next recommended step:
+- Add a CLI timeout option.

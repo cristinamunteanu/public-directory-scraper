@@ -11,13 +11,23 @@ class FetchResult:
     body: bytes
 
 
-def fetch_url(url, timeout=10):
+def fetch_url(url, timeout=10, retries=0):
     """Fetch one URL and return its status, reason, and response body."""
+    if retries < 0:
+        raise ValueError("retries must be at least 0")
+
     request = Request(url, headers={"User-Agent": "public-directory-scraper/0.1"})
 
-    with urlopen(request, timeout=timeout) as response:
-        return FetchResult(
-            status_code=getattr(response, "status", None) or 200,
-            reason=getattr(response, "reason", None) or "OK",
-            body=response.read(),
-        )
+    for attempt in range(retries + 1):
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                return FetchResult(
+                    status_code=getattr(response, "status", None) or 200,
+                    reason=getattr(response, "reason", None) or "OK",
+                    body=response.read(),
+                )
+        except OSError:
+            if attempt == retries:
+                raise
+
+    raise RuntimeError("unreachable fetch retry state")
