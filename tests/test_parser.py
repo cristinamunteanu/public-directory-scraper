@@ -43,6 +43,27 @@ class ParseListingTest(unittest.TestCase):
             ],
         )
 
+    def test_ignores_product_pod_text_without_books_markup(self):
+        html = """
+        <article>
+          <h2 data-field="name">Example Business</h2>
+          <a data-field="url" href="https://example.com">Visit website</a>
+          <p>product_pod appears in text only</p>
+        </article>
+        """
+
+        records = parse_listings(html)
+
+        self.assertEqual(
+            records,
+            [
+                {
+                    "name": "Example Business",
+                    "url": "https://example.com",
+                }
+            ],
+        )
+
     def test_parses_books_to_scrape_page(self):
         html = (FIXTURES_DIR / "books_page.html").read_text(encoding="utf-8")
 

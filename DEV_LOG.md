@@ -766,3 +766,29 @@ Known limitations:
 
 Next recommended step:
 - Re-review the remaining findings and choose the next small fix.
+
+## 2026-06-09
+
+Removed raw substring parser dispatch.
+
+Why this structure:
+- `parse_listings()` now tries fixture-style records structurally before trying Books records.
+- Books parsing depends on actual product card records, not a plain `"product_pod"` text match.
+- A regression test covers HTML where `product_pod` appears only as text.
+
+Important tradeoffs:
+- Parser mode is still inferred from markup rather than passed explicitly.
+- Invalid partial records still fail through the generic listing error when no complete parser output exists.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The parser is still tailored to fixture-style listings and Books to Scrape cards.
+
+Next recommended step:
+- Harden malformed price handling.

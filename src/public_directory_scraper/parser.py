@@ -198,38 +198,56 @@ def _normalize_space(parts):
 
 def parse_listings(html):
     """Parse all listing records and require each one to have name and URL."""
-    if "product_pod" in html:
-        return _parse_books(html)
+    listing_records = _parse_fixture_listings(html)
+    if listing_records:
+        return listing_records
 
+    book_records = _parse_books_listings(html)
+    if book_records:
+        return book_records
+
+    raise ValueError("listing must include name and url")
+
+
+def _parse_fixture_listings(html):
+    """Parse fixture-style data-field listing records when present."""
     parser = _ListingsParser()
     parser.feed(html)
     parser.close()
     parser.finish()
 
     if not parser.records:
-        raise ValueError("listing must include name and url")
+        return []
 
-    for record in parser.records:
-        if not record["name"] or not record["url"]:
-            raise ValueError("listing must include name and url")
+    if all(record["name"] and record["url"] for record in parser.records):
+        return parser.records
 
-    return parser.records
+    return []
 
 
-def _parse_books(html):
-    """Parse all Books to Scrape records from product_pod markup."""
+def _parse_books_listings(html):
+    """Parse Books to Scrape records when product card markup is present."""
     parser = _BooksParser()
     parser.feed(html)
     parser.close()
 
     if not parser.records:
+        return []
+
+    if all(record["title"] and record["book_url"] for record in parser.records):
+        return parser.records
+
+    return []
+
+
+def _parse_books(html):
+    """Parse all Books to Scrape records from product_pod markup."""
+    records = _parse_books_listings(html)
+
+    if not records:
         raise ValueError("book listing must include title and book_url")
 
-    for record in parser.records:
-        if not record["title"] or not record["book_url"]:
-            raise ValueError("book listing must include title and book_url")
-
-    return parser.records
+    return records
 
 
 def parse_listing(html):
