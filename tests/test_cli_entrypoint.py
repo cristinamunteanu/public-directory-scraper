@@ -510,6 +510,62 @@ class CliEntrypointTest(unittest.TestCase):
             "catalogue/a-light-in-the-attic_1000/index.html",
         )
 
+    def test_scrape_command_reports_output_write_error(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "missing" / "books.csv"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "scrape",
+                    (FIXTURES_DIR / "books_page.html").as_uri(),
+                    "--output",
+                    str(output_path),
+                ],
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertTrue(
+            result.stderr.startswith(f"Error: could not write {output_path}: ")
+        )
+
+    def test_parse_command_reports_output_write_error(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "missing" / "books.csv"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "public_directory_scraper",
+                    "parse",
+                    str(FIXTURES_DIR / "books_page.html"),
+                    "--output",
+                    str(output_path),
+                ],
+                capture_output=True,
+                env=env,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertTrue(
+            result.stderr.startswith(f"Error: could not write {output_path}: ")
+        )
+
     def test_parse_command_reports_missing_file(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

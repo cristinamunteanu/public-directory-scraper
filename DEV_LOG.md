@@ -688,3 +688,29 @@ Known limitations:
 
 Next recommended step:
 - Stop feature work for this small portfolio scraper unless a new requirement appears.
+
+## 2026-06-08
+
+Handled output write failures in the CLI.
+
+Why this structure:
+- `parse --output` and `scrape --output` now catch filesystem write errors.
+- Unsupported extensions still return usage-style errors, while write failures return runtime errors.
+- Tests cover missing output directories for both command paths.
+
+Important tradeoffs:
+- The exporter still leaves directory creation to the caller.
+- Error text includes the original operating-system message for debugging.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Output directories are not created automatically.
+
+Next recommended step:
+- Decide whether output directories should be created automatically or remain explicit.

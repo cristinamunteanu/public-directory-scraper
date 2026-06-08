@@ -162,6 +162,12 @@ def main(argv=None) -> int:
                 except ValueError as error:
                     print(f"Error: {error}", file=sys.stderr)
                     return 2
+                except OSError as error:
+                    print(
+                        f"Error: could not write {output_path}: {error}",
+                        file=sys.stderr,
+                    )
+                    return 1
 
                 print(f"Wrote {count} records to {output_path}")
                 return 0
@@ -194,6 +200,9 @@ def main(argv=None) -> int:
                 except ValueError as error:
                     print(f"Error: {error}", file=sys.stderr)
                     return 2
+                except OSError as error:
+                    print(f"Error: could not write {args[3]}: {error}", file=sys.stderr)
+                    return 1
 
                 print(f"Wrote {count} records to {args[3]}")
                 return 0
