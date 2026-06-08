@@ -2,8 +2,11 @@ import csv
 from pathlib import Path
 
 from openpyxl import Workbook
+from openpyxl.styles import Font
 
 DEFAULT_CSV_FIELDS = ["name", "url"]
+MAX_EXCEL_COLUMN_WIDTH = 60
+MIN_EXCEL_COLUMN_WIDTH = 12
 
 
 def write_records(records, output_path):
@@ -46,8 +49,23 @@ def write_records_excel(records, output_path):
     for row in rows:
         sheet.append([row.get(fieldname, "") for fieldname in fieldnames])
 
+    _format_excel_sheet(sheet)
     workbook.save(path)
     return len(rows)
+
+
+def _format_excel_sheet(sheet):
+    """Apply simple readable formatting to an Excel worksheet."""
+    sheet.freeze_panes = "A2"
+
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+
+    for column_cells in sheet.columns:
+        column_letter = column_cells[0].column_letter
+        max_length = max(len(str(cell.value or "")) for cell in column_cells)
+        width = min(max(max_length + 2, MIN_EXCEL_COLUMN_WIDTH), MAX_EXCEL_COLUMN_WIDTH)
+        sheet.column_dimensions[column_letter].width = width
 
 
 def _fieldnames_from_records(records):

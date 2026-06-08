@@ -81,6 +81,10 @@ class WriteRecordsCsvTest(unittest.TestCase):
                 ("A Light in the Attic", 51.77, "In stock"),
             ],
         )
+        self.assertEqual(sheet.freeze_panes, "A2")
+        self.assertTrue(sheet["A1"].font.bold)
+        self.assertGreaterEqual(sheet.column_dimensions["A"].width, 20)
+        self.assertGreaterEqual(sheet.column_dimensions["B"].width, 12)
 
     def test_rejects_unknown_output_extension(self):
         with tempfile.TemporaryDirectory() as temp_dir:

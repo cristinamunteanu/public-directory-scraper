@@ -661,3 +661,30 @@ Known limitations:
 
 Next recommended step:
 - Improve Excel output formatting.
+
+## 2026-06-08
+
+Improved Excel output formatting.
+
+Why this structure:
+- Excel formatting stays inside `exporter.py`, next to workbook creation.
+- The header row is frozen and bolded so exported files are easier to inspect.
+- Column widths are derived from content with simple min/max bounds.
+
+Important tradeoffs:
+- Formatting is intentionally plain: no filters, colors, number formats, or styling themes.
+- CSV output is unchanged.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --output /tmp/books.xlsx
+```
+
+Known limitations:
+- Excel formatting is basic and intended only for readability.
+
+Next recommended step:
+- Stop feature work for this small portfolio scraper unless a new requirement appears.
