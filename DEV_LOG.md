@@ -633,3 +633,31 @@ Known limitations:
 
 Next recommended step:
 - Add a crawl delay option.
+
+## 2026-06-08
+
+Added a crawl delay option for paginated scraping.
+
+Why this structure:
+- `scrape_pages()` accepts `delay` and sleeps only between page requests.
+- `scrape --delay SECONDS` exposes that behavior for manual live scraping.
+- Delay validation allows `0` as the no-delay default and rejects negative values.
+
+Important tradeoffs:
+- Delay is not backoff; it is a fixed pause between successful page transitions.
+- The fetch command does not accept delay because it downloads only one URL.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --delay 0
+```
+
+Known limitations:
+- There is no CLI retry option yet.
+- There is no exponential backoff.
+
+Next recommended step:
+- Improve Excel output formatting.

@@ -366,6 +366,67 @@ class CliEntrypointTest(unittest.TestCase):
         )
         self.assertEqual(result.stderr, "")
 
+    def test_scrape_command_accepts_delay_option(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "scrape",
+                (FIXTURES_DIR / "listings.html").as_uri(),
+                "--delay",
+                "0",
+            ],
+            check=True,
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(
+            json.loads(result.stdout),
+            [
+                {
+                    "name": "Example Business",
+                    "url": "https://example.com",
+                },
+                {
+                    "name": "Second Business",
+                    "url": "https://second.example",
+                },
+            ],
+        )
+        self.assertEqual(result.stderr, "")
+
+    def test_scrape_command_rejects_negative_delay(self):
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(PROJECT_ROOT / "src")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "public_directory_scraper",
+                "scrape",
+                (FIXTURES_DIR / "listings.html").as_uri(),
+                "--delay",
+                "-1",
+            ],
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr.strip(),
+            "Error: --delay must be zero or a positive number",
+        )
+
     def test_parse_command_writes_listing_csv(self):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(PROJECT_ROOT / "src")

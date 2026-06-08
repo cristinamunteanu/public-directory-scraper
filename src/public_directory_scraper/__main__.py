@@ -22,6 +22,19 @@ def _parse_positive_float(value, option_name):
     return number
 
 
+def _parse_non_negative_float(value, option_name):
+    """Parse a non-negative floating-point option value."""
+    try:
+        number = float(value)
+    except ValueError as error:
+        raise ValueError(f"{option_name} must be zero or a positive number") from error
+
+    if number < 0:
+        raise ValueError(f"{option_name} must be zero or a positive number")
+
+    return number
+
+
 def _parse_fetch_options(options):
     """Parse fetch-only options and return timeout seconds."""
     timeout = 10
@@ -48,6 +61,7 @@ def _parse_scrape_options(options):
     max_pages = 1
     output_path = None
     timeout = 10
+    delay = 0
     index = 0
 
     while index < len(options):
@@ -76,6 +90,14 @@ def _parse_scrape_options(options):
             index += 2
             continue
 
+        if option == "--delay":
+            if index + 1 >= len(options):
+                raise ValueError("--delay requires a value")
+
+            delay = _parse_non_negative_float(options[index + 1], "--delay")
+            index += 2
+            continue
+
         if option == "--output":
             if index + 1 >= len(options):
                 raise ValueError("--output requires a path")
@@ -86,7 +108,7 @@ def _parse_scrape_options(options):
 
         raise ValueError(f"unknown scrape option: {option}")
 
-    return max_pages, output_path, timeout
+    return max_pages, output_path, timeout, delay
 
 
 def main(argv=None) -> int:
@@ -118,13 +140,18 @@ def main(argv=None) -> int:
             url = args[1]
 
             try:
-                max_pages, output_path, timeout = _parse_scrape_options(args[2:])
+                max_pages, output_path, timeout, delay = _parse_scrape_options(args[2:])
             except ValueError as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 2
 
             try:
-                records = scrape_pages(url, max_pages=max_pages, timeout=timeout)
+                records = scrape_pages(
+                    url,
+                    max_pages=max_pages,
+                    timeout=timeout,
+                    delay=delay,
+                )
             except (OSError, ValueError) as error:
                 print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
                 return 1
@@ -178,7 +205,7 @@ def main(argv=None) -> int:
         usage = (
             "Usage: python -m public_directory_scraper "
             "[fetch URL [--timeout SECONDS] | "
-            "scrape URL [--pages N] [--timeout SECONDS] "
+            "scrape URL [--pages N] [--timeout SECONDS] [--delay SECONDS] "
             "[--output OUTPUT.csv|OUTPUT.xlsx] | "
             "parse HTML_FILE [--output OUTPUT.csv|OUTPUT.xlsx]]"
         )

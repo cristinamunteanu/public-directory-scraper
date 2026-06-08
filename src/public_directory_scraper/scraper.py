@@ -1,17 +1,22 @@
+from time import sleep
+
 from .cleaner import clean_books_records, deduplicate_records
 from .fetcher import fetch_url
 from .parser import parse_listings, parse_next_page_url
 
 
-def scrape_url(url, timeout=10):
+def scrape_url(url, timeout=10, delay=0):
     """Fetch one URL, decode the response as HTML, and parse listing records."""
-    return scrape_pages(url, max_pages=1, timeout=timeout)
+    return scrape_pages(url, max_pages=1, timeout=timeout, delay=delay)
 
 
-def scrape_pages(url, max_pages=1, timeout=10):
+def scrape_pages(url, max_pages=1, timeout=10, delay=0):
     """Fetch and parse pages by following next links up to max_pages."""
     if max_pages < 1:
         raise ValueError("pages must be at least 1")
+
+    if delay < 0:
+        raise ValueError("delay must be at least 0")
 
     records = []
     current_url = url
@@ -29,6 +34,9 @@ def scrape_pages(url, max_pages=1, timeout=10):
         next_url = parse_next_page_url(html, current_url)
         if not next_url:
             break
+
+        if delay:
+            sleep(delay)
 
         current_url = next_url
 
