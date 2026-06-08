@@ -714,3 +714,30 @@ Known limitations:
 
 Next recommended step:
 - Decide whether output directories should be created automatically or remain explicit.
+
+## 2026-06-08
+
+Exposed retry support through scraper and CLI commands.
+
+Why this structure:
+- `scrape_pages()` now passes retries to each `fetch_url()` call.
+- `fetch --retries N` and `scrape --retries N` make the existing retry support usable.
+- Retry validation requires a zero or positive integer.
+
+Important tradeoffs:
+- Retries are immediate; there is still no exponential backoff.
+- Retry behavior stays simple and does not change the default of zero retries.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper fetch file:///absolute/path/to/books_page.html --retries 1
+```
+
+Known limitations:
+- There is no retry delay or backoff.
+
+Next recommended step:
+- Update README limitations and command examples for timeout, delay, and retries.

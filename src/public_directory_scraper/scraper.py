@@ -5,12 +5,12 @@ from .fetcher import fetch_url
 from .parser import parse_listings, parse_next_page_url
 
 
-def scrape_url(url, timeout=10, delay=0):
+def scrape_url(url, timeout=10, delay=0, retries=0):
     """Fetch one URL, decode the response as HTML, and parse listing records."""
-    return scrape_pages(url, max_pages=1, timeout=timeout, delay=delay)
+    return scrape_pages(url, max_pages=1, timeout=timeout, delay=delay, retries=retries)
 
 
-def scrape_pages(url, max_pages=1, timeout=10, delay=0):
+def scrape_pages(url, max_pages=1, timeout=10, delay=0, retries=0):
     """Fetch and parse pages by following next links up to max_pages."""
     if max_pages < 1:
         raise ValueError("pages must be at least 1")
@@ -22,7 +22,7 @@ def scrape_pages(url, max_pages=1, timeout=10, delay=0):
     current_url = url
 
     for _page_number in range(max_pages):
-        result = fetch_url(current_url, timeout=timeout)
+        result = fetch_url(current_url, timeout=timeout, retries=retries)
         html = result.body.decode("utf-8", errors="replace")
         page_records = parse_listings(html)
 

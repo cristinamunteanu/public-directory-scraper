@@ -35,9 +35,23 @@ def _parse_non_negative_float(value, option_name):
     return number
 
 
+def _parse_non_negative_int(value, option_name):
+    """Parse a non-negative integer option value."""
+    try:
+        number = int(value)
+    except ValueError as error:
+        raise ValueError(f"{option_name} must be zero or a positive integer") from error
+
+    if number < 0:
+        raise ValueError(f"{option_name} must be zero or a positive integer")
+
+    return number
+
+
 def _parse_fetch_options(options):
-    """Parse fetch-only options and return timeout seconds."""
+    """Parse fetch-only options and return timeout seconds plus retries."""
     timeout = 10
+    retries = 0
     index = 0
 
     while index < len(options):
@@ -51,9 +65,17 @@ def _parse_fetch_options(options):
             index += 2
             continue
 
+        if option == "--retries":
+            if index + 1 >= len(options):
+                raise ValueError("--retries requires a value")
+
+            retries = _parse_non_negative_int(options[index + 1], "--retries")
+            index += 2
+            continue
+
         raise ValueError(f"unknown fetch option: {option}")
 
-    return timeout
+    return timeout, retries
 
 
 def _parse_scrape_options(options):
@@ -62,6 +84,7 @@ def _parse_scrape_options(options):
     output_path = None
     timeout = 10
     delay = 0
+    retries = 0
     index = 0
 
     while index < len(options):
@@ -90,6 +113,14 @@ def _parse_scrape_options(options):
             index += 2
             continue
 
+        if option == "--retries":
+            if index + 1 >= len(options):
+                raise ValueError("--retries requires a value")
+
+            retries = _parse_non_negative_int(options[index + 1], "--retries")
+            index += 2
+            continue
+
         if option == "--delay":
             if index + 1 >= len(options):
                 raise ValueError("--delay requires a value")
@@ -108,7 +139,7 @@ def _parse_scrape_options(options):
 
         raise ValueError(f"unknown scrape option: {option}")
 
-    return max_pages, output_path, timeout, delay
+    return max_pages, output_path, timeout, delay, retries
 
 
 def main(argv=None) -> int:
@@ -121,13 +152,13 @@ def main(argv=None) -> int:
             url = args[1]
 
             try:
-                timeout = _parse_fetch_options(args[2:])
+                timeout, retries = _parse_fetch_options(args[2:])
             except ValueError as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 2
 
             try:
-                result = fetch_url(url, timeout=timeout)
+                result = fetch_url(url, timeout=timeout, retries=retries)
             except (OSError, ValueError) as error:
                 print(f"Error: could not fetch {url}: {error}", file=sys.stderr)
                 return 1
@@ -140,7 +171,9 @@ def main(argv=None) -> int:
             url = args[1]
 
             try:
-                max_pages, output_path, timeout, delay = _parse_scrape_options(args[2:])
+                max_pages, output_path, timeout, delay, retries = _parse_scrape_options(
+                    args[2:]
+                )
             except ValueError as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 2
@@ -151,6 +184,7 @@ def main(argv=None) -> int:
                     max_pages=max_pages,
                     timeout=timeout,
                     delay=delay,
+                    retries=retries,
                 )
             except (OSError, ValueError) as error:
                 print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
@@ -213,8 +247,9 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL [--timeout SECONDS] | "
-            "scrape URL [--pages N] [--timeout SECONDS] [--delay SECONDS] "
+            "[fetch URL [--timeout SECONDS] [--retries N] | "
+            "scrape URL [--pages N] [--timeout SECONDS] [--retries N] "
+            "[--delay SECONDS] "
             "[--output OUTPUT.csv|OUTPUT.xlsx] | "
             "parse HTML_FILE [--output OUTPUT.csv|OUTPUT.xlsx]]"
         )
