@@ -9,10 +9,45 @@ from .parser import parse_listings
 from .scraper import scrape_pages
 
 
+def _parse_positive_float(value, option_name):
+    """Parse a positive floating-point option value."""
+    try:
+        number = float(value)
+    except ValueError as error:
+        raise ValueError(f"{option_name} must be a positive number") from error
+
+    if number <= 0:
+        raise ValueError(f"{option_name} must be a positive number")
+
+    return number
+
+
+def _parse_fetch_options(options):
+    """Parse fetch-only options and return timeout seconds."""
+    timeout = 10
+    index = 0
+
+    while index < len(options):
+        option = options[index]
+
+        if option == "--timeout":
+            if index + 1 >= len(options):
+                raise ValueError("--timeout requires a value")
+
+            timeout = _parse_positive_float(options[index + 1], "--timeout")
+            index += 2
+            continue
+
+        raise ValueError(f"unknown fetch option: {option}")
+
+    return timeout
+
+
 def _parse_scrape_options(options):
     """Parse scrape-only options and return page limit plus output path."""
     max_pages = 1
     output_path = None
+    timeout = 10
     index = 0
 
     while index < len(options):
@@ -33,6 +68,14 @@ def _parse_scrape_options(options):
             index += 2
             continue
 
+        if option == "--timeout":
+            if index + 1 >= len(options):
+                raise ValueError("--timeout requires a value")
+
+            timeout = _parse_positive_float(options[index + 1], "--timeout")
+            index += 2
+            continue
+
         if option == "--output":
             if index + 1 >= len(options):
                 raise ValueError("--output requires a path")
@@ -43,7 +86,7 @@ def _parse_scrape_options(options):
 
         raise ValueError(f"unknown scrape option: {option}")
 
-    return max_pages, output_path
+    return max_pages, output_path, timeout
 
 
 def main(argv=None) -> int:
@@ -52,11 +95,17 @@ def main(argv=None) -> int:
 
     if args:
         command = args[0]
-        if command == "fetch" and len(args) == 2:
+        if command == "fetch" and len(args) >= 2:
             url = args[1]
 
             try:
-                result = fetch_url(url)
+                timeout = _parse_fetch_options(args[2:])
+            except ValueError as error:
+                print(f"Error: {error}", file=sys.stderr)
+                return 2
+
+            try:
+                result = fetch_url(url, timeout=timeout)
             except (OSError, ValueError) as error:
                 print(f"Error: could not fetch {url}: {error}", file=sys.stderr)
                 return 1
@@ -69,13 +118,13 @@ def main(argv=None) -> int:
             url = args[1]
 
             try:
-                max_pages, output_path = _parse_scrape_options(args[2:])
+                max_pages, output_path, timeout = _parse_scrape_options(args[2:])
             except ValueError as error:
                 print(f"Error: {error}", file=sys.stderr)
                 return 2
 
             try:
-                records = scrape_pages(url, max_pages=max_pages)
+                records = scrape_pages(url, max_pages=max_pages, timeout=timeout)
             except (OSError, ValueError) as error:
                 print(f"Error: could not scrape {url}: {error}", file=sys.stderr)
                 return 1
@@ -128,7 +177,9 @@ def main(argv=None) -> int:
 
         usage = (
             "Usage: python -m public_directory_scraper "
-            "[fetch URL | scrape URL [--pages N] [--output OUTPUT.csv|OUTPUT.xlsx] | "
+            "[fetch URL [--timeout SECONDS] | "
+            "scrape URL [--pages N] [--timeout SECONDS] "
+            "[--output OUTPUT.csv|OUTPUT.xlsx] | "
             "parse HTML_FILE [--output OUTPUT.csv|OUTPUT.xlsx]]"
         )
         print(usage, file=sys.stderr)

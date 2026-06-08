@@ -34,6 +34,25 @@ class ScrapeUrlTest(unittest.TestCase):
         )
         self.assertEqual(fetch_url.call_args.args[0], "https://example.com/directory")
 
+    def test_passes_timeout_to_fetcher(self):
+        body = b"""
+        <article>
+          <h2 data-field="name">Example Business</h2>
+          <a data-field="url" href="https://example.com">Visit website</a>
+        </article>
+        """
+
+        with patch("public_directory_scraper.scraper.fetch_url") as fetch_url:
+            fetch_url.return_value = FetchResult(
+                status_code=200,
+                reason="OK",
+                body=body,
+            )
+
+            scrape_url("https://example.com/directory", timeout=2.5)
+
+        self.assertEqual(fetch_url.call_args.kwargs["timeout"], 2.5)
+
     def test_fetches_parses_and_cleans_books(self):
         body = b"""
         <article class="product_pod">

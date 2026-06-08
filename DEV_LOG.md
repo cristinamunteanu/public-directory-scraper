@@ -605,3 +605,31 @@ Known limitations:
 
 Next recommended step:
 - Add a CLI timeout option.
+
+## 2026-06-08
+
+Added a CLI timeout option for fetch and scrape commands.
+
+Why this structure:
+- `fetch URL --timeout SECONDS` passes timeout directly to `fetch_url()`.
+- `scrape URL --timeout SECONDS` passes timeout through `scrape_pages()` to each fetched page.
+- Timeout parsing is shared by both commands and rejects non-positive values.
+
+Important tradeoffs:
+- This slice does not expose retry settings through the CLI.
+- Timeout is documented in code and tests, but README command examples are unchanged.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+.venv/bin/python -m public_directory_scraper fetch file:///absolute/path/to/books_page.html --timeout 2.5
+```
+
+Known limitations:
+- There is no CLI retry option yet.
+- There is no crawl delay or backoff yet.
+
+Next recommended step:
+- Add a crawl delay option.
