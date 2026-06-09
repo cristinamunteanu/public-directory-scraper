@@ -1,5 +1,8 @@
 from dataclasses import dataclass
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+
+DEFAULT_ALLOWED_SCHEMES = {"file", "http", "https"}
 
 
 @dataclass(frozen=True)
@@ -11,10 +14,15 @@ class FetchResult:
     body: bytes
 
 
-def fetch_url(url, timeout=10, retries=0):
+def fetch_url(url, timeout=10, retries=0, allowed_schemes=DEFAULT_ALLOWED_SCHEMES):
     """Fetch one URL and return its status, reason, and response body."""
     if retries < 0:
         raise ValueError("retries must be at least 0")
+
+    scheme = urlparse(url).scheme
+    if scheme not in allowed_schemes:
+        allowed = ", ".join(sorted(allowed_schemes))
+        raise ValueError(f"URL scheme must be one of: {allowed}")
 
     request = Request(url, headers={"User-Agent": "public-directory-scraper/0.1"})
 

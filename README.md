@@ -144,6 +144,7 @@ Useful local commands:
 - Pagination is limited by the `--pages` value.
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
+- The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.

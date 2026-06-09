@@ -49,6 +49,14 @@ class FetchUrlTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "retries must be at least 0"):
             fetch_url("https://example.com", retries=-1)
 
+    def test_rejects_unsupported_url_scheme(self):
+        with self.assertRaisesRegex(ValueError, "URL scheme must be one of"):
+            fetch_url("ftp://example.com/file")
+
+    def test_allows_callers_to_restrict_url_schemes(self):
+        with self.assertRaisesRegex(ValueError, "URL scheme must be one of: https"):
+            fetch_url("file:///tmp/page.html", allowed_schemes={"https"})
+
 
 if __name__ == "__main__":
     unittest.main()

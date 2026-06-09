@@ -818,3 +818,29 @@ Known limitations:
 
 Next recommended step:
 - Re-review remaining findings and decide whether URL safety needs a small local-only note or code restriction.
+
+## 2026-06-09
+
+Added URL scheme validation to fetching.
+
+Why this structure:
+- `fetch_url()` rejects unsupported URL schemes before calling `urlopen()`.
+- `http`, `https`, and `file` stay allowed so live scraping and local fixture workflows both work.
+- Callers can pass a stricter `allowed_schemes` set for production-style reuse.
+
+Important tradeoffs:
+- The CLI still allows `file://` URLs because the project uses local fixtures for deterministic checks.
+- This is scheme validation, not full domain allowlisting or SSRF protection.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Production use should restrict allowed schemes and trusted domains at the application boundary.
+
+Next recommended step:
+- Re-review remaining findings and decide whether CLI parsing should be simplified.
