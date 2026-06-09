@@ -844,3 +844,29 @@ Known limitations:
 
 Next recommended step:
 - Re-review remaining findings and decide whether CLI parsing should be simplified.
+
+## 2026-06-09
+
+Replaced manual CLI option parsing with argparse.
+
+Why this structure:
+- `argparse` now owns command and option parsing for `fetch`, `scrape`, and `parse`.
+- Numeric validation still uses small local helpers so existing user-facing validation messages stay stable.
+- The no-argument command still prints the package version for the simple smoke check.
+
+Important tradeoffs:
+- The CLI module is still responsible for command dispatch and error translation.
+- `argparse` error wording is used for missing required arguments and unknown options.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- This keeps the CLI in `__main__.py`; a dedicated CLI module is not needed yet.
+
+Next recommended step:
+- Run a final critical review pass.
