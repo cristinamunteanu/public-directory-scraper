@@ -870,3 +870,29 @@ Known limitations:
 
 Next recommended step:
 - Run a final critical review pass.
+
+## 2026-06-10
+
+Started the Postgres ETL direction with configuration loading.
+
+Why this structure:
+- `config.py` reads `DATABASE_URL` and scraper defaults from environment variables.
+- `.env.example` documents local settings without committing real secrets.
+- This slice does not add a database driver or connect to Postgres yet.
+
+Important tradeoffs:
+- `.env` files are not loaded automatically; environment variables must already be set.
+- The current scraper and file export behavior are unchanged.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- No Postgres connection, schema, raw table, cleaned table, or ETL command exists yet.
+
+Next recommended step:
+- Add a small database connection module with a mocked test.

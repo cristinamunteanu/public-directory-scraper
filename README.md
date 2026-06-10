@@ -92,6 +92,24 @@ Useful local commands:
 .venv/bin/python -m public_directory_scraper fetch https://books.toscrape.com/
 ```
 
+## ETL Configuration
+
+The project is being extended toward a small Postgres ETL pipeline. The first ETL slice only adds configuration loading; it does not connect to Postgres yet.
+
+Copy the example environment file when you are ready to configure local database settings:
+
+```bash
+cp .env.example .env
+```
+
+Current ETL-related environment variables:
+
+- `DATABASE_URL`
+- `DEFAULT_PAGES`
+- `DEFAULT_TIMEOUT`
+- `DEFAULT_RETRIES`
+- `DEFAULT_DELAY`
+
 ## Project Layout
 
 ```text
@@ -99,6 +117,7 @@ Useful local commands:
 ├── src/public_directory_scraper/
 │   ├── __init__.py
 │   ├── __main__.py
+│   ├── config.py
 │   ├── cleaner.py
 │   ├── exporter.py
 │   ├── fetcher.py
@@ -113,6 +132,7 @@ Useful local commands:
 │   │   └── simple_listing.html
 │   ├── test_books_fixture.py
 │   ├── test_cleaner.py
+│   ├── test_config.py
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
@@ -124,6 +144,7 @@ Useful local commands:
 ├── docs/
 │   └── screenshots/
 │       └── books-output.svg
+├── .env.example
 ├── pyproject.toml
 ├── README.md
 └── DEV_LOG.md
@@ -136,6 +157,7 @@ Useful local commands:
 - `cleaner.py` normalizes prices, ratings, text, URLs, and duplicates.
 - `scraper.py` connects fetching, parsing, cleaning, and pagination.
 - `exporter.py` writes records to CSV or Excel.
+- `config.py` reads future ETL settings from environment variables.
 - `__main__.py` exposes the command-line interface.
 
 ## Limitations
@@ -145,6 +167,7 @@ Useful local commands:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
+- ETL configuration exists, but Postgres loading is not implemented yet.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.
