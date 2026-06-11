@@ -1000,3 +1000,29 @@ Known limitations:
 
 Next recommended step:
 - Add a small ETL orchestration function that connects scrape, raw load, clean, and cleaned load.
+
+## 2026-06-11
+
+Added a core ETL load pipeline for already-extracted book records.
+
+Why this structure:
+- `pipeline.py` coordinates raw loading, cleaning, deduplication, and cleaned loading.
+- The function accepts raw records directly, so it can be tested without a live website or database.
+- The result object returns raw and cleaned counts for visible feedback.
+
+Important tradeoffs:
+- This does not fetch pages yet; extraction will be wired in separately.
+- The existing file export behavior is unchanged.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is still no CLI command that runs the ETL pipeline.
+
+Next recommended step:
+- Add a raw extraction function that can feed this pipeline from Books to Scrape pages.
