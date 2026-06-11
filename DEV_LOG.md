@@ -974,3 +974,29 @@ Known limitations:
 
 Next recommended step:
 - Add a cleaned-books loader with deduplication/upsert behavior.
+
+## 2026-06-11
+
+Added a cleaned-books loader for the ETL path.
+
+Why this structure:
+- `insert_cleaned_books()` stores normalized records in `cleaned_books`.
+- Postgres handles deduplication with `ON CONFLICT (book_url)`.
+- Empty numeric fields are converted to `None` so Postgres can store them as `NULL`.
+
+Important tradeoffs:
+- This slice assumes records have already been cleaned before loading.
+- Validation is limited to fields required by the table: `title`, `book_url`, and `source_url`.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is still no command that runs extract, clean, and load together.
+
+Next recommended step:
+- Add a small ETL orchestration function that connects scrape, raw load, clean, and cleaned load.
