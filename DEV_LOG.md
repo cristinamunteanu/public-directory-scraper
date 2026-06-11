@@ -896,3 +896,29 @@ Known limitations:
 
 Next recommended step:
 - Add a small database connection module with a mocked test.
+
+## 2026-06-11
+
+Added a small Postgres connection wrapper.
+
+Why this structure:
+- `database.py` centralizes future Postgres connection creation.
+- `connect()` accepts an injectable connector so unit tests do not need a running database.
+- `psycopg[binary]` is declared as the real Postgres driver for future ETL slices.
+
+Important tradeoffs:
+- No schema, table creation, inserts, or ETL command were added yet.
+- Tests verify connection wiring with a fake connector, not a live Postgres instance.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- A real connection requires dependencies to be installed and a reachable Postgres database.
+
+Next recommended step:
+- Add schema creation for raw and cleaned book tables.

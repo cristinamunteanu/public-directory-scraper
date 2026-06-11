@@ -94,7 +94,7 @@ Useful local commands:
 
 ## ETL Configuration
 
-The project is being extended toward a small Postgres ETL pipeline. The first ETL slice only adds configuration loading; it does not connect to Postgres yet.
+The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading and a small Postgres connection wrapper. It does not create tables or load records yet.
 
 Copy the example environment file when you are ready to configure local database settings:
 
@@ -119,6 +119,7 @@ Current ETL-related environment variables:
 │   ├── __main__.py
 │   ├── config.py
 │   ├── cleaner.py
+│   ├── database.py
 │   ├── exporter.py
 │   ├── fetcher.py
 │   ├── parser.py
@@ -133,6 +134,7 @@ Current ETL-related environment variables:
 │   ├── test_books_fixture.py
 │   ├── test_cleaner.py
 │   ├── test_config.py
+│   ├── test_database.py
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
@@ -158,6 +160,7 @@ Current ETL-related environment variables:
 - `scraper.py` connects fetching, parsing, cleaning, and pagination.
 - `exporter.py` writes records to CSV or Excel.
 - `config.py` reads future ETL settings from environment variables.
+- `database.py` opens future Postgres connections.
 - `__main__.py` exposes the command-line interface.
 
 ## Limitations
@@ -167,7 +170,7 @@ Current ETL-related environment variables:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
-- ETL configuration exists, but Postgres loading is not implemented yet.
+- ETL configuration and connection wrapping exist, but Postgres tables and loading are not implemented yet.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.
