@@ -948,3 +948,29 @@ Known limitations:
 
 Next recommended step:
 - Add a raw-books loader.
+
+## 2026-06-11
+
+Added a raw-books loader for the ETL path.
+
+Why this structure:
+- `loader.py` keeps insert logic separate from schema creation and scraping.
+- `insert_raw_books()` receives a connection object, so tests can use fakes instead of a live database.
+- Each raw row stores the visible columns plus the original record as JSON for inspection.
+
+Important tradeoffs:
+- This slice inserts raw rows only; it does not load cleaned rows yet.
+- There is no CLI command for running the ETL pipeline yet.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Real Postgres behavior still needs an integration check later.
+
+Next recommended step:
+- Add a cleaned-books loader with deduplication/upsert behavior.

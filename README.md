@@ -94,7 +94,7 @@ Useful local commands:
 
 ## ETL Configuration
 
-The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, and schema creation helpers. It does not load records yet.
+The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, schema creation helpers, and a raw table loader.
 
 Copy the example environment file when you are ready to configure local database settings:
 
@@ -122,6 +122,7 @@ Current ETL-related environment variables:
 │   ├── database.py
 │   ├── exporter.py
 │   ├── fetcher.py
+│   ├── loader.py
 │   ├── parser.py
 │   ├── schema.py
 │   └── scraper.py
@@ -139,6 +140,7 @@ Current ETL-related environment variables:
 │   ├── test_cli_entrypoint.py
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
+│   ├── test_loader.py
 │   ├── test_parser.py
 │   ├── test_schema.py
 │   ├── test_scraper.py
@@ -163,6 +165,7 @@ Current ETL-related environment variables:
 - `exporter.py` writes records to CSV or Excel.
 - `config.py` reads future ETL settings from environment variables.
 - `database.py` opens future Postgres connections.
+- `loader.py` inserts raw scraped records into Postgres.
 - `schema.py` creates future raw and cleaned Postgres tables.
 - `__main__.py` exposes the command-line interface.
 
@@ -173,7 +176,7 @@ Current ETL-related environment variables:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
-- ETL configuration, connection wrapping, and schema creation exist, but Postgres loading is not implemented yet.
+- ETL raw loading exists, but cleaned-table loading and a full ETL command are not implemented yet.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.
