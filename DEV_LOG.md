@@ -922,3 +922,29 @@ Known limitations:
 
 Next recommended step:
 - Add schema creation for raw and cleaned book tables.
+
+## 2026-06-11
+
+Added schema creation for raw and cleaned book tables.
+
+Why this structure:
+- `schema.py` keeps table creation separate from connection and loading code.
+- `raw_books` stores original scraped fields plus a JSON payload for inspection.
+- `cleaned_books` stores normalized fields and enforces uniqueness on `book_url`.
+
+Important tradeoffs:
+- Tests use fake connection and cursor objects, not a live Postgres database.
+- No insert/load behavior is included in this slice.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Schema creation is not wired into a CLI or pipeline yet.
+
+Next recommended step:
+- Add a raw-books loader.

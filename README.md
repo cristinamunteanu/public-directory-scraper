@@ -94,7 +94,7 @@ Useful local commands:
 
 ## ETL Configuration
 
-The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading and a small Postgres connection wrapper. It does not create tables or load records yet.
+The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, and schema creation helpers. It does not load records yet.
 
 Copy the example environment file when you are ready to configure local database settings:
 
@@ -123,6 +123,7 @@ Current ETL-related environment variables:
 │   ├── exporter.py
 │   ├── fetcher.py
 │   ├── parser.py
+│   ├── schema.py
 │   └── scraper.py
 ├── tests/
 │   ├── fixtures/
@@ -139,6 +140,7 @@ Current ETL-related environment variables:
 │   ├── test_exporter.py
 │   ├── test_fetcher.py
 │   ├── test_parser.py
+│   ├── test_schema.py
 │   ├── test_scraper.py
 │   └── test_import.py
 ├── sample_outputs/
@@ -161,6 +163,7 @@ Current ETL-related environment variables:
 - `exporter.py` writes records to CSV or Excel.
 - `config.py` reads future ETL settings from environment variables.
 - `database.py` opens future Postgres connections.
+- `schema.py` creates future raw and cleaned Postgres tables.
 - `__main__.py` exposes the command-line interface.
 
 ## Limitations
@@ -170,7 +173,7 @@ Current ETL-related environment variables:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
-- ETL configuration and connection wrapping exist, but Postgres tables and loading are not implemented yet.
+- ETL configuration, connection wrapping, and schema creation exist, but Postgres loading is not implemented yet.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.
