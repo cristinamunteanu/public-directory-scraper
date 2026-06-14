@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from .cleaner import clean_books_records, deduplicate_records
 from .loader import insert_cleaned_books, insert_raw_books
+from .scraper import extract_books_pages
 
 
 @dataclass(frozen=True)
@@ -31,3 +32,29 @@ def load_books_records(connection, records, run_id, source_url):
     )
 
     return EtlResult(raw_count=raw_count, cleaned_count=cleaned_count)
+
+
+def run_books_etl(
+    connection,
+    url,
+    run_id,
+    pages=1,
+    timeout=10,
+    delay=0,
+    retries=0,
+):
+    """Extract raw book records from pages and load them into Postgres tables."""
+    records = extract_books_pages(
+        url,
+        max_pages=pages,
+        timeout=timeout,
+        delay=delay,
+        retries=retries,
+    )
+
+    return load_books_records(
+        connection,
+        records,
+        run_id=run_id,
+        source_url=url,
+    )

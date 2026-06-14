@@ -94,7 +94,7 @@ Useful local commands:
 
 ## ETL Configuration
 
-The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, schema creation helpers, raw extraction, raw/cleaned table loaders, and a core load pipeline.
+The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, schema creation helpers, raw extraction, raw/cleaned table loaders, and a core ETL pipeline function.
 
 Copy the example environment file when you are ready to configure local database settings:
 
@@ -168,7 +168,7 @@ Current ETL-related environment variables:
 - `config.py` reads future ETL settings from environment variables.
 - `database.py` opens future Postgres connections.
 - `loader.py` inserts raw and cleaned records into Postgres.
-- `pipeline.py` loads raw records, cleans them, and loads cleaned records.
+- `pipeline.py` extracts raw records, loads raw rows, cleans records, and loads cleaned rows.
 - `schema.py` creates future raw and cleaned Postgres tables.
 - `__main__.py` exposes the command-line interface.
 
@@ -179,7 +179,7 @@ Current ETL-related environment variables:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
-- ETL raw extraction and raw/cleaned loading exist, but there is no full ETL command yet.
+- ETL extraction and raw/cleaned loading exist, but there is no full ETL command yet.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.

@@ -1052,3 +1052,29 @@ Known limitations:
 
 Next recommended step:
 - Add a small ETL function that extracts raw pages and calls `load_books_records()`.
+
+## 2026-06-14
+
+Added a small ETL orchestration function.
+
+Why this structure:
+- `run_books_etl()` connects raw extraction with the existing load pipeline.
+- Tests mock extraction and loading, so they do not require internet access or Postgres.
+- The CLI remains unchanged until the core behavior is stable.
+
+Important tradeoffs:
+- This still needs a command-level entrypoint before users can run it directly from the terminal.
+- It uses the starting URL as the source URL for the ETL run.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- No live Postgres integration test exists yet.
+
+Next recommended step:
+- Add an `etl` CLI command that loads config, connects to Postgres, creates tables, and runs this pipeline.
