@@ -123,6 +123,51 @@ Current ETL-related environment variables:
 The ETL command logs start, success, and failure events through Python's standard
 `logging` module. It does not write log files by default.
 
+## Local Postgres Check
+
+Use this manual check when you have Postgres installed locally.
+
+Create the database:
+
+```bash
+createdb public_directory_scraper
+```
+
+Prepare local settings:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if your local Postgres username, password, host, or port is different.
+
+Run one small ETL load:
+
+```bash
+.venv/bin/python -m public_directory_scraper etl https://books.toscrape.com/ --run-id local-check --pages 1 --timeout 10 --retries 1 --delay 0
+```
+
+Expected command output:
+
+```text
+Raw records loaded: 20
+Cleaned records loaded: 20
+```
+
+Inspect the loaded tables:
+
+```bash
+psql public_directory_scraper -c "SELECT COUNT(*) FROM raw_books;"
+psql public_directory_scraper -c "SELECT COUNT(*) FROM cleaned_books;"
+psql public_directory_scraper -c "SELECT title, price_gbp, rating FROM cleaned_books LIMIT 5;"
+```
+
+Remove the local database when you are done:
+
+```bash
+dropdb public_directory_scraper
+```
+
 ## Project Layout
 
 ```text

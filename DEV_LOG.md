@@ -1156,3 +1156,29 @@ Known limitations:
 
 Next recommended step:
 - Add a small real-Postgres setup note or integration check plan.
+
+## 2026-06-14
+
+Added a local Postgres manual check.
+
+Why this structure:
+- The README now shows how to create a local database, run one ETL load, inspect row counts, and clean up.
+- `.env.example` explains which settings usually need editing.
+- This stays documentation-only because live Postgres tests would require extra infrastructure.
+
+Important tradeoffs:
+- The check assumes Postgres command-line tools like `createdb`, `psql`, and `dropdb` are installed.
+- It does not add Docker Compose or automated integration tests.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The real database check is manual.
+
+Next recommended step:
+- Do a final critical review of the ETL implementation before considering the feature complete.
