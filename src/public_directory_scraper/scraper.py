@@ -10,13 +10,33 @@ def scrape_url(url, timeout=10, delay=0, retries=0):
     return scrape_pages(url, max_pages=1, timeout=timeout, delay=delay, retries=retries)
 
 
+def extract_books_pages(url, max_pages=1, timeout=10, delay=0, retries=0):
+    """Fetch and parse raw Books to Scrape records up to max_pages."""
+    _validate_page_options(max_pages, delay)
+
+    records = []
+    current_url = url
+
+    for _page_number in range(max_pages):
+        result = fetch_url(current_url, timeout=timeout, retries=retries)
+        html = result.body.decode("utf-8", errors="replace")
+        records.extend(parse_listings(html))
+
+        next_url = parse_next_page_url(html, current_url)
+        if not next_url:
+            break
+
+        if delay:
+            sleep(delay)
+
+        current_url = next_url
+
+    return records
+
+
 def scrape_pages(url, max_pages=1, timeout=10, delay=0, retries=0):
     """Fetch and parse pages by following next links up to max_pages."""
-    if max_pages < 1:
-        raise ValueError("pages must be at least 1")
-
-    if delay < 0:
-        raise ValueError("delay must be at least 0")
+    _validate_page_options(max_pages, delay)
 
     records = []
     current_url = url
@@ -41,3 +61,12 @@ def scrape_pages(url, max_pages=1, timeout=10, delay=0, retries=0):
         current_url = next_url
 
     return deduplicate_records(records, key="book_url")
+
+
+def _validate_page_options(max_pages, delay):
+    """Validate shared pagination options."""
+    if max_pages < 1:
+        raise ValueError("pages must be at least 1")
+
+    if delay < 0:
+        raise ValueError("delay must be at least 0")

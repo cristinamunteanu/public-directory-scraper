@@ -1026,3 +1026,29 @@ Known limitations:
 
 Next recommended step:
 - Add a raw extraction function that can feed this pipeline from Books to Scrape pages.
+
+## 2026-06-11
+
+Added raw Books to Scrape extraction for the ETL path.
+
+Why this structure:
+- `extract_books_pages()` returns parser records before cleaning or deduplication.
+- Existing `scrape_pages()` still returns cleaned, deduplicated records for CSV and Excel export.
+- Shared pagination validation keeps the two paths consistent.
+
+Important tradeoffs:
+- The raw extraction function is not wired into a database-running command yet.
+- Pagination logic is still simple and bounded by `max_pages`.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The full extract-load pipeline still needs a command-level entrypoint.
+
+Next recommended step:
+- Add a small ETL function that extracts raw pages and calls `load_books_records()`.
