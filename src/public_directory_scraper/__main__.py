@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -12,6 +13,9 @@ from .parser import parse_listings
 from .pipeline import run_books_etl
 from .schema import create_tables
 from .scraper import scrape_pages
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class _CliArgumentParser(argparse.ArgumentParser):
@@ -222,6 +226,16 @@ def main(argv=None) -> int:
         connection = None
 
         try:
+            logger.info(
+                "Starting ETL run %s for %s "
+                "(pages=%s, timeout=%s, delay=%s, retries=%s)",
+                parsed_args.run_id,
+                url,
+                max_pages,
+                timeout,
+                delay,
+                retries,
+            )
             connection = connect(config.database_url)
             create_tables(connection)
             result = run_books_etl(
@@ -234,12 +248,19 @@ def main(argv=None) -> int:
                 retries=retries,
             )
         except Exception as error:
+            logger.exception("ETL run %s failed for %s", parsed_args.run_id, url)
             print(f"Error: could not run ETL for {url}: {error}", file=sys.stderr)
             return 1
         finally:
             if connection is not None:
                 connection.close()
 
+        logger.info(
+            "Finished ETL run %s: raw_count=%s cleaned_count=%s",
+            parsed_args.run_id,
+            result.raw_count,
+            result.cleaned_count,
+        )
         print(f"Raw records loaded: {result.raw_count}")
         print(f"Cleaned records loaded: {result.cleaned_count}")
         return 0

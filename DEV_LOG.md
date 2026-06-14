@@ -1104,3 +1104,29 @@ Known limitations:
 
 Next recommended step:
 - Add lightweight logging around ETL start, counts, and failures.
+
+## 2026-06-14
+
+Added lightweight ETL logging.
+
+Why this structure:
+- The ETL command logs start, success counts, and runtime failures.
+- Logs use Python's standard `logging` module without adding dependencies.
+- Normal command output stays unchanged for users and tests.
+
+Important tradeoffs:
+- No log files or structured JSON logs are configured.
+- Applications can configure logging later if they want visible logs.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Logs are not visible by default unless logging is configured by the caller.
+
+Next recommended step:
+- Add optional `.env` file loading or document shell-based environment setup more clearly.

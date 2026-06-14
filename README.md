@@ -117,6 +117,9 @@ Current ETL-related environment variables:
 - `DEFAULT_RETRIES`
 - `DEFAULT_DELAY`
 
+The ETL command logs start, success, and failure events through Python's standard
+`logging` module. It does not write log files by default.
+
 ## Project Layout
 
 ```text
@@ -187,6 +190,7 @@ Current ETL-related environment variables:
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
 - The ETL command requires a reachable Postgres database through `DATABASE_URL`.
+- ETL logging uses the standard logging module, but no file or JSON logging is configured.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.

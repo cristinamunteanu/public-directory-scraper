@@ -724,6 +724,7 @@ class CliEntrypointTest(unittest.TestCase):
             patch("public_directory_scraper.__main__.connect") as connect,
             patch("public_directory_scraper.__main__.create_tables") as create_tables,
             patch("public_directory_scraper.__main__.run_books_etl") as run_books_etl,
+            patch("public_directory_scraper.__main__.logger") as logger,
             redirect_stdout(stdout),
             redirect_stderr(stderr),
         ):
@@ -764,6 +765,23 @@ class CliEntrypointTest(unittest.TestCase):
             timeout=7,
             delay=0.5,
             retries=2,
+        )
+        self.assertEqual(logger.info.call_count, 2)
+        logger.info.assert_any_call(
+            "Starting ETL run %s for %s "
+            "(pages=%s, timeout=%s, delay=%s, retries=%s)",
+            "run-1",
+            "https://books.toscrape.com/",
+            3,
+            7,
+            0.5,
+            2,
+        )
+        logger.info.assert_any_call(
+            "Finished ETL run %s: raw_count=%s cleaned_count=%s",
+            "run-1",
+            4,
+            3,
         )
         self.assertTrue(connection.closed)
 
@@ -830,6 +848,48 @@ class CliEntrypointTest(unittest.TestCase):
         self.assertEqual(exit_code, 2)
         self.assertEqual(stdout.getvalue(), "")
         self.assertEqual(stderr.getvalue().strip(), "Error: DATABASE_URL is required")
+
+    def test_etl_command_logs_runtime_failure(self):
+        connection = FakeConnection()
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with (
+            patch("public_directory_scraper.__main__.load_config") as load_config,
+            patch("public_directory_scraper.__main__.connect") as connect,
+            patch("public_directory_scraper.__main__.create_tables"),
+            patch("public_directory_scraper.__main__.run_books_etl") as run_books_etl,
+            patch("public_directory_scraper.__main__.logger") as logger,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            load_config.return_value = EtlConfig(
+                database_url="postgresql://localhost/public_directory_scraper",
+            )
+            connect.return_value = connection
+            run_books_etl.side_effect = RuntimeError("load failed")
+
+            exit_code = main(
+                [
+                    "etl",
+                    "https://books.toscrape.com/",
+                    "--run-id",
+                    "run-1",
+                ]
+            )
+
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(
+            stderr.getvalue().strip(),
+            "Error: could not run ETL for https://books.toscrape.com/: load failed",
+        )
+        logger.exception.assert_called_once_with(
+            "ETL run %s failed for %s",
+            "run-1",
+            "https://books.toscrape.com/",
+        )
+        self.assertTrue(connection.closed)
 
 
 class FakeConnection:
