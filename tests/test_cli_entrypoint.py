@@ -720,6 +720,7 @@ class CliEntrypointTest(unittest.TestCase):
         stderr = io.StringIO()
 
         with (
+            patch("public_directory_scraper.__main__.load_env_file") as load_env_file,
             patch("public_directory_scraper.__main__.load_config") as load_config,
             patch("public_directory_scraper.__main__.connect") as connect,
             patch("public_directory_scraper.__main__.create_tables") as create_tables,
@@ -753,6 +754,7 @@ class CliEntrypointTest(unittest.TestCase):
             "Raw records loaded: 4\nCleaned records loaded: 3\n",
         )
         self.assertEqual(stderr.getvalue(), "")
+        load_env_file.assert_called_once_with()
         connect.assert_called_once_with(
             "postgresql://localhost/public_directory_scraper"
         )
@@ -789,6 +791,7 @@ class CliEntrypointTest(unittest.TestCase):
         connection = FakeConnection()
 
         with (
+            patch("public_directory_scraper.__main__.load_env_file"),
             patch("public_directory_scraper.__main__.load_config") as load_config,
             patch("public_directory_scraper.__main__.connect") as connect,
             patch("public_directory_scraper.__main__.create_tables"),
@@ -830,6 +833,7 @@ class CliEntrypointTest(unittest.TestCase):
         stderr = io.StringIO()
 
         with (
+            patch("public_directory_scraper.__main__.load_env_file"),
             patch("public_directory_scraper.__main__.load_config") as load_config,
             redirect_stdout(stdout),
             redirect_stderr(stderr),
@@ -855,6 +859,7 @@ class CliEntrypointTest(unittest.TestCase):
         stderr = io.StringIO()
 
         with (
+            patch("public_directory_scraper.__main__.load_env_file"),
             patch("public_directory_scraper.__main__.load_config") as load_config,
             patch("public_directory_scraper.__main__.connect") as connect,
             patch("public_directory_scraper.__main__.create_tables"),

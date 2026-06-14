@@ -109,6 +109,9 @@ Copy the example environment file when you are ready to configure local database
 cp .env.example .env
 ```
 
+The `etl` command loads `.env` automatically. Existing shell environment variables
+are not overwritten by `.env` values.
+
 Current ETL-related environment variables:
 
 - `DATABASE_URL`
@@ -190,6 +193,7 @@ The ETL command logs start, success, and failure events through Python's standar
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
 - The ETL command requires a reachable Postgres database through `DATABASE_URL`.
+- `.env` loading supports simple `KEY=value` lines only.
 - ETL logging uses the standard logging module, but no file or JSON logging is configured.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.

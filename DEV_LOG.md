@@ -1130,3 +1130,29 @@ Known limitations:
 
 Next recommended step:
 - Add optional `.env` file loading or document shell-based environment setup more clearly.
+
+## 2026-06-14
+
+Added simple `.env` loading for the ETL command.
+
+Why this structure:
+- `config.py` loads local `KEY=value` settings without adding a dependency.
+- Shell environment variables still take priority over `.env` values.
+- The ETL command loads `.env` before reading configuration.
+
+Important tradeoffs:
+- The parser intentionally supports only simple one-line values.
+- It does not support multiline values, variable expansion, or `export KEY=value`.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- `.env` parsing is intentionally minimal for this project.
+
+Next recommended step:
+- Add a small real-Postgres setup note or integration check plan.

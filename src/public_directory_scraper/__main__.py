@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .config import load_config
+from .config import load_config, load_env_file
 from .database import connect
 from .exporter import write_records
 from .fetcher import fetch_url
@@ -198,6 +198,7 @@ def main(argv=None) -> int:
         url = parsed_args.url
 
         try:
+            load_env_file()
             config = load_config()
             max_pages = _optional_positive_int(
                 parsed_args.pages,

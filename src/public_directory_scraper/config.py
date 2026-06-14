@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,42 @@ def load_config(environ=None):
     )
 
 
+def load_env_file(path=".env", environ=None):
+    """Load simple KEY=value settings from a local .env file."""
+    values = os.environ if environ is None else environ
+    env_path = Path(path)
+
+    try:
+        lines = env_path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return 0
+
+    loaded_count = 0
+
+    for line_number, line in enumerate(lines, start=1):
+        text = line.strip()
+
+        if not text or text.startswith("#"):
+            continue
+
+        if "=" not in text:
+            raise ValueError(f"invalid .env line {line_number}: expected KEY=value")
+
+        name, value = text.split("=", 1)
+        name = name.strip()
+
+        if not name:
+            raise ValueError(f"invalid .env line {line_number}: expected KEY=value")
+
+        if name in values:
+            continue
+
+        values[name] = _strip_optional_quotes(value.strip())
+        loaded_count += 1
+
+    return loaded_count
+
+
 def _get_number(
     values,
     name,
@@ -78,5 +115,13 @@ def _get_number(
 
     if value < minimum or (not include_minimum and value == minimum):
         raise ValueError(f"{name} must be {description}")
+
+    return value
+
+
+def _strip_optional_quotes(value):
+    """Remove matching single or double quotes around an environment value."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
 
     return value
