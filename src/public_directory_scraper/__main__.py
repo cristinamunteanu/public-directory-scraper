@@ -4,9 +4,13 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .config import load_config
+from .database import connect
 from .exporter import write_records
 from .fetcher import fetch_url
 from .parser import parse_listings
+from .pipeline import run_books_etl
+from .schema import create_tables
 from .scraper import scrape_pages
 
 
@@ -87,6 +91,14 @@ def _build_parser():
     scrape_parser.add_argument("--retries", default="0")
     scrape_parser.add_argument("--delay", default="0")
     scrape_parser.add_argument("--output")
+
+    etl_parser = subparsers.add_parser("etl")
+    etl_parser.add_argument("url")
+    etl_parser.add_argument("--run-id", required=True)
+    etl_parser.add_argument("--pages")
+    etl_parser.add_argument("--timeout")
+    etl_parser.add_argument("--retries")
+    etl_parser.add_argument("--delay")
 
     parse_parser = subparsers.add_parser("parse")
     parse_parser.add_argument("input_path")
@@ -178,6 +190,60 @@ def main(argv=None) -> int:
         print(json.dumps(records))
         return 0
 
+    if parsed_args.command == "etl":
+        url = parsed_args.url
+
+        try:
+            config = load_config()
+            max_pages = _optional_positive_int(
+                parsed_args.pages,
+                config.default_pages,
+                "--pages",
+            )
+            timeout = _optional_positive_float(
+                parsed_args.timeout,
+                config.default_timeout,
+                "--timeout",
+            )
+            delay = _optional_non_negative_float(
+                parsed_args.delay,
+                config.default_delay,
+                "--delay",
+            )
+            retries = _optional_non_negative_int(
+                parsed_args.retries,
+                config.default_retries,
+                "--retries",
+            )
+        except ValueError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            return 2
+
+        connection = None
+
+        try:
+            connection = connect(config.database_url)
+            create_tables(connection)
+            result = run_books_etl(
+                connection,
+                url,
+                run_id=parsed_args.run_id,
+                pages=max_pages,
+                timeout=timeout,
+                delay=delay,
+                retries=retries,
+            )
+        except Exception as error:
+            print(f"Error: could not run ETL for {url}: {error}", file=sys.stderr)
+            return 1
+        finally:
+            if connection is not None:
+                connection.close()
+
+        print(f"Raw records loaded: {result.raw_count}")
+        print(f"Cleaned records loaded: {result.cleaned_count}")
+        return 0
+
     if parsed_args.command == "parse":
         input_path = parsed_args.input_path
 
@@ -218,6 +284,38 @@ def main(argv=None) -> int:
 
     print(f"Error: unknown command: {parsed_args.command}", file=sys.stderr)
     return 2
+
+
+def _optional_positive_int(value, default, option_name):
+    """Parse an optional positive integer option value."""
+    if value is None:
+        return default
+
+    return _parse_positive_int(value, option_name)
+
+
+def _optional_non_negative_int(value, default, option_name):
+    """Parse an optional non-negative integer option value."""
+    if value is None:
+        return default
+
+    return _parse_non_negative_int(value, option_name)
+
+
+def _optional_positive_float(value, default, option_name):
+    """Parse an optional positive floating-point option value."""
+    if value is None:
+        return default
+
+    return _parse_positive_float(value, option_name)
+
+
+def _optional_non_negative_float(value, default, option_name):
+    """Parse an optional non-negative floating-point option value."""
+    if value is None:
+        return default
+
+    return _parse_non_negative_float(value, option_name)
 
 
 if __name__ == "__main__":

@@ -34,6 +34,12 @@ Run against the live site:
 .venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --timeout 10 --retries 1 --delay 1 --output books.csv
 ```
 
+Run the ETL pipeline after setting `DATABASE_URL`:
+
+```bash
+.venv/bin/python -m public_directory_scraper etl https://books.toscrape.com/ --run-id books-001 --pages 2 --timeout 10 --retries 1 --delay 1
+```
+
 Save Excel output instead:
 
 ```bash
@@ -90,6 +96,7 @@ Useful local commands:
 .venv/bin/python -m public_directory_scraper
 .venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
 .venv/bin/python -m public_directory_scraper fetch https://books.toscrape.com/
+.venv/bin/python -m public_directory_scraper etl https://books.toscrape.com/ --run-id manual-test
 ```
 
 ## ETL Configuration
@@ -179,7 +186,7 @@ Current ETL-related environment variables:
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
-- ETL extraction and raw/cleaned loading exist, but there is no full ETL command yet.
+- The ETL command requires a reachable Postgres database through `DATABASE_URL`.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
 - The sample CSV is static and should be refreshed if output fields change.

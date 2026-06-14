@@ -1,13 +1,20 @@
 import csv
+import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from openpyxl import load_workbook
+
+from public_directory_scraper.__main__ import main
+from public_directory_scraper.config import EtlConfig
+from public_directory_scraper.pipeline import EtlResult
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures"
@@ -706,6 +713,131 @@ class CliEntrypointTest(unittest.TestCase):
             result.stderr.strip(),
             "Error: listing must include name and url",
         )
+
+    def test_etl_command_runs_pipeline(self):
+        connection = FakeConnection()
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with (
+            patch("public_directory_scraper.__main__.load_config") as load_config,
+            patch("public_directory_scraper.__main__.connect") as connect,
+            patch("public_directory_scraper.__main__.create_tables") as create_tables,
+            patch("public_directory_scraper.__main__.run_books_etl") as run_books_etl,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            load_config.return_value = EtlConfig(
+                database_url="postgresql://localhost/public_directory_scraper",
+                default_pages=3,
+                default_timeout=7,
+                default_retries=2,
+                default_delay=0.5,
+            )
+            connect.return_value = connection
+            run_books_etl.return_value = EtlResult(raw_count=4, cleaned_count=3)
+
+            exit_code = main(
+                [
+                    "etl",
+                    "https://books.toscrape.com/",
+                    "--run-id",
+                    "run-1",
+                ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(
+            stdout.getvalue(),
+            "Raw records loaded: 4\nCleaned records loaded: 3\n",
+        )
+        self.assertEqual(stderr.getvalue(), "")
+        connect.assert_called_once_with(
+            "postgresql://localhost/public_directory_scraper"
+        )
+        create_tables.assert_called_once_with(connection)
+        run_books_etl.assert_called_once_with(
+            connection,
+            "https://books.toscrape.com/",
+            run_id="run-1",
+            pages=3,
+            timeout=7,
+            delay=0.5,
+            retries=2,
+        )
+        self.assertTrue(connection.closed)
+
+    def test_etl_command_accepts_runtime_options(self):
+        connection = FakeConnection()
+
+        with (
+            patch("public_directory_scraper.__main__.load_config") as load_config,
+            patch("public_directory_scraper.__main__.connect") as connect,
+            patch("public_directory_scraper.__main__.create_tables"),
+            patch("public_directory_scraper.__main__.run_books_etl") as run_books_etl,
+            redirect_stdout(io.StringIO()),
+            redirect_stderr(io.StringIO()),
+        ):
+            load_config.return_value = EtlConfig(
+                database_url="postgresql://localhost/public_directory_scraper",
+            )
+            connect.return_value = connection
+            run_books_etl.return_value = EtlResult(raw_count=1, cleaned_count=1)
+
+            exit_code = main(
+                [
+                    "etl",
+                    "https://books.toscrape.com/",
+                    "--run-id",
+                    "run-1",
+                    "--pages",
+                    "2",
+                    "--timeout",
+                    "5",
+                    "--delay",
+                    "1.5",
+                    "--retries",
+                    "1",
+                ]
+            )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(run_books_etl.call_args.kwargs["pages"], 2)
+        self.assertEqual(run_books_etl.call_args.kwargs["timeout"], 5.0)
+        self.assertEqual(run_books_etl.call_args.kwargs["delay"], 1.5)
+        self.assertEqual(run_books_etl.call_args.kwargs["retries"], 1)
+
+    def test_etl_command_reports_missing_database_url(self):
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with (
+            patch("public_directory_scraper.__main__.load_config") as load_config,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            load_config.side_effect = ValueError("DATABASE_URL is required")
+
+            exit_code = main(
+                [
+                    "etl",
+                    "https://books.toscrape.com/",
+                    "--run-id",
+                    "run-1",
+                ]
+            )
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertEqual(stderr.getvalue().strip(), "Error: DATABASE_URL is required")
+
+
+class FakeConnection:
+    def __init__(self):
+        self.closed = False
+
+    def close(self):
+        self.closed = True
 
 
 if __name__ == "__main__":

@@ -1078,3 +1078,29 @@ Known limitations:
 
 Next recommended step:
 - Add an `etl` CLI command that loads config, connects to Postgres, creates tables, and runs this pipeline.
+
+## 2026-06-14
+
+Added the first ETL CLI command.
+
+Why this structure:
+- `python -m public_directory_scraper etl URL --run-id RUN_ID` runs the core ETL flow.
+- The command reads database and default runtime settings from environment config.
+- Tests mock database and pipeline calls, so validation does not need a live Postgres instance.
+
+Important tradeoffs:
+- `.env` files are still not loaded automatically.
+- The command assumes `DATABASE_URL` points to a reachable Postgres database.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- There is no integration test against a real Postgres container yet.
+
+Next recommended step:
+- Add lightweight logging around ETL start, counts, and failures.
