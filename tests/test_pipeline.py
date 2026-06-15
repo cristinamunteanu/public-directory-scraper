@@ -46,7 +46,10 @@ class LoadBooksRecordsTest(unittest.TestCase):
                 source_url="https://books.toscrape.com/",
             )
 
-        self.assertEqual(result, EtlResult(raw_count=2, cleaned_count=1))
+        self.assertEqual(
+            result,
+            EtlResult(run_id="run-1", raw_count=2, cleaned_count=1),
+        )
         raw_loader.assert_called_once_with(
             connection,
             records,
@@ -125,7 +128,11 @@ class RunBooksEtlTest(unittest.TestCase):
             patch("public_directory_scraper.pipeline.load_books_records") as load,
         ):
             extract_pages.return_value = records
-            load.return_value = EtlResult(raw_count=1, cleaned_count=1)
+            load.return_value = EtlResult(
+                run_id="run-1",
+                raw_count=1,
+                cleaned_count=1,
+            )
 
             result = run_books_etl(
                 connection,
@@ -137,7 +144,10 @@ class RunBooksEtlTest(unittest.TestCase):
                 retries=1,
             )
 
-        self.assertEqual(result, EtlResult(raw_count=1, cleaned_count=1))
+        self.assertEqual(
+            result,
+            EtlResult(run_id="run-1", raw_count=1, cleaned_count=1),
+        )
         extract_pages.assert_called_once_with(
             "https://books.toscrape.com/",
             max_pages=2,

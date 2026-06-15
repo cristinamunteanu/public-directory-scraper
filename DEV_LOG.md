@@ -1234,3 +1234,28 @@ Known limitations:
 
 Next recommended step:
 - Re-run the final critical review and decide whether finding 3 should be fixed.
+
+## 2026-06-15
+
+Included `run_id` in ETL results.
+
+Why this structure:
+- `EtlResult` now carries the run identifier with the row counts.
+- Tests can connect pipeline results back to the ETL run that produced them.
+- The CLI output remains unchanged and still prints the visible row counts.
+
+Important tradeoffs:
+- Existing callers must provide or expect `run_id` when constructing `EtlResult`.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- `EtlResult` still does not include timestamps or status.
+
+Next recommended step:
+- Re-run the final critical review and decide whether finding 4 needs any action.

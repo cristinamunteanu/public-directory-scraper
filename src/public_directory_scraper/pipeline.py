@@ -9,6 +9,7 @@ from .scraper import extract_books_pages
 class EtlResult:
     """Summary counts from one ETL load."""
 
+    run_id: str
     raw_count: int
     cleaned_count: int
 
@@ -36,7 +37,7 @@ def load_books_records(connection, records, run_id, source_url):
         _rollback_if_available(connection)
         raise
 
-    return EtlResult(raw_count=raw_count, cleaned_count=cleaned_count)
+    return EtlResult(run_id=run_id, raw_count=raw_count, cleaned_count=cleaned_count)
 
 
 def run_books_etl(

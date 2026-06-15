@@ -737,7 +737,11 @@ class CliEntrypointTest(unittest.TestCase):
                 default_delay=0.5,
             )
             connect.return_value = connection
-            run_books_etl.return_value = EtlResult(raw_count=4, cleaned_count=3)
+            run_books_etl.return_value = EtlResult(
+                run_id="run-1",
+                raw_count=4,
+                cleaned_count=3,
+            )
 
             exit_code = main(
                 [
@@ -803,7 +807,11 @@ class CliEntrypointTest(unittest.TestCase):
                 database_url="postgresql://localhost/public_directory_scraper",
             )
             connect.return_value = connection
-            run_books_etl.return_value = EtlResult(raw_count=1, cleaned_count=1)
+            run_books_etl.return_value = EtlResult(
+                run_id="run-1",
+                raw_count=1,
+                cleaned_count=1,
+            )
 
             exit_code = main(
                 [
