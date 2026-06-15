@@ -1285,3 +1285,30 @@ Known limitations:
 
 Next recommended step:
 - Re-run the final critical review and decide whether finding 5 needs any action.
+
+## 2026-06-15
+
+Added an optional Postgres integration test.
+
+Why this structure:
+- The test is skipped by default unless `INTEGRATION_DATABASE_URL` is set.
+- It creates the schema, loads one raw record through the ETL pipeline, verifies raw and cleaned rows, and deletes its own rows.
+- The normal unit test loop still works without a local database.
+
+Important tradeoffs:
+- This is opt-in because it requires a real Postgres database.
+- The test assumes the database URL points to a disposable local development database.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+INTEGRATION_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/public_directory_scraper .venv/bin/python -m unittest tests.test_postgres_integration
+```
+
+Known limitations:
+- The integration test is not wired into CI.
+
+Next recommended step:
+- Re-run the final critical review and decide whether the ETL feature is complete.

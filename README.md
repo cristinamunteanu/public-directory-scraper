@@ -169,6 +169,15 @@ Remove the local database when you are done:
 dropdb public_directory_scraper
 ```
 
+Run the optional Postgres integration test against that database:
+
+```bash
+INTEGRATION_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/public_directory_scraper .venv/bin/python -m unittest tests.test_postgres_integration
+```
+
+The normal test command skips this integration test unless `INTEGRATION_DATABASE_URL`
+is set.
+
 ## Project Layout
 
 ```text
