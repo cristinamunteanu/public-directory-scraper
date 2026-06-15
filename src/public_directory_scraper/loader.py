@@ -89,7 +89,6 @@ def insert_raw_books(connection, records, run_id, source_url):
             )
             inserted_count += 1
 
-    connection.commit()
     return inserted_count
 
 
@@ -104,7 +103,6 @@ def insert_cleaned_books(connection, records, source_url):
         for row in rows:
             cursor.execute(INSERT_CLEANED_BOOK_SQL, row)
 
-    connection.commit()
     return len(rows)
 
 

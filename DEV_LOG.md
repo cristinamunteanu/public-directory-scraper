@@ -1182,3 +1182,29 @@ Known limitations:
 
 Next recommended step:
 - Do a final critical review of the ETL implementation before considering the feature complete.
+
+## 2026-06-15
+
+Fixed ETL transaction boundaries.
+
+Why this structure:
+- Raw and cleaned insert helpers no longer commit by themselves.
+- `load_books_records()` commits once after both raw and cleaned loading succeed.
+- The pipeline rolls back when a load step fails and the connection supports rollback.
+
+Important tradeoffs:
+- Direct loader callers must commit or roll back through the connection.
+- Transaction handling remains simple and connection-level.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Real transaction behavior should still be checked against local Postgres.
+
+Next recommended step:
+- Re-run the final critical review and decide whether finding 2 should be fixed.

@@ -15,21 +15,26 @@ class EtlResult:
 
 def load_books_records(connection, records, run_id, source_url):
     """Load raw book records, clean them, and load cleaned records."""
-    raw_count = insert_raw_books(
-        connection,
-        records,
-        run_id=run_id,
-        source_url=source_url,
-    )
-    cleaned_records = deduplicate_records(
-        clean_books_records(records, base_url=source_url),
-        key="book_url",
-    )
-    cleaned_count = insert_cleaned_books(
-        connection,
-        cleaned_records,
-        source_url=source_url,
-    )
+    try:
+        raw_count = insert_raw_books(
+            connection,
+            records,
+            run_id=run_id,
+            source_url=source_url,
+        )
+        cleaned_records = deduplicate_records(
+            clean_books_records(records, base_url=source_url),
+            key="book_url",
+        )
+        cleaned_count = insert_cleaned_books(
+            connection,
+            cleaned_records,
+            source_url=source_url,
+        )
+        connection.commit()
+    except Exception:
+        _rollback_if_available(connection)
+        raise
 
     return EtlResult(raw_count=raw_count, cleaned_count=cleaned_count)
 
@@ -58,3 +63,11 @@ def run_books_etl(
         run_id=run_id,
         source_url=url,
     )
+
+
+def _rollback_if_available(connection):
+    """Rollback the active transaction when the connection supports it."""
+    rollback = getattr(connection, "rollback", None)
+
+    if rollback is not None:
+        rollback()

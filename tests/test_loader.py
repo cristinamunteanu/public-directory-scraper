@@ -55,7 +55,7 @@ class InsertRawBooksTest(unittest.TestCase):
         )
 
         self.assertEqual(inserted_count, 1)
-        self.assertTrue(connection.committed)
+        self.assertFalse(connection.committed)
 
         statement, params = connection.cursor_instance.calls[0]
         self.assertEqual(statement, INSERT_RAW_BOOK_SQL)
@@ -129,7 +129,7 @@ class InsertCleanedBooksTest(unittest.TestCase):
         )
 
         self.assertEqual(inserted_count, 1)
-        self.assertTrue(connection.committed)
+        self.assertFalse(connection.committed)
 
         statement, params = connection.cursor_instance.calls[0]
         self.assertEqual(statement, INSERT_CLEANED_BOOK_SQL)
