@@ -1259,3 +1259,29 @@ Known limitations:
 
 Next recommended step:
 - Re-run the final critical review and decide whether finding 4 needs any action.
+
+## 2026-06-15
+
+Relaxed `.env` parsing for common local syntax.
+
+Why this structure:
+- The parser now accepts `export KEY=value` lines.
+- Inline comments like `KEY=value # note` are ignored.
+- `#` inside quoted values is preserved.
+
+Important tradeoffs:
+- The parser is still intentionally small and does not implement full dotenv syntax.
+- Multiline values and variable expansion remain unsupported.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Complex `.env` files should use a dedicated dotenv library instead.
+
+Next recommended step:
+- Re-run the final critical review and decide whether finding 5 needs any action.

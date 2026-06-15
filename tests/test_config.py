@@ -87,6 +87,31 @@ class LoadConfigTest(unittest.TestCase):
         self.assertEqual(values["DEFAULT_PAGES"], "2")
         self.assertEqual(values["DEFAULT_TIMEOUT"], "5.5")
 
+    def test_loads_exported_env_file_values_and_inline_comments(self):
+        with TemporaryDirectory() as temp_dir:
+            env_path = Path(temp_dir) / ".env"
+            env_path.write_text(
+                "\n".join(
+                    [
+                        "export DATABASE_URL=postgresql://localhost/database",
+                        "DEFAULT_PAGES=2 # small local check",
+                        "PASSWORD='secret # not a comment'",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            values = {}
+
+            loaded_count = load_env_file(env_path, environ=values)
+
+        self.assertEqual(loaded_count, 3)
+        self.assertEqual(
+            values["DATABASE_URL"],
+            "postgresql://localhost/database",
+        )
+        self.assertEqual(values["DEFAULT_PAGES"], "2")
+        self.assertEqual(values["PASSWORD"], "secret # not a comment")
+
     def test_ignores_missing_env_file(self):
         with TemporaryDirectory() as temp_dir:
             loaded_count = load_env_file(Path(temp_dir) / ".env", environ={})

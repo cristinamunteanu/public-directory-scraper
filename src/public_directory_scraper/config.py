@@ -78,6 +78,9 @@ def load_env_file(path=".env", environ=None):
         if not text or text.startswith("#"):
             continue
 
+        if text.startswith("export "):
+            text = text.removeprefix("export ").strip()
+
         if "=" not in text:
             raise ValueError(f"invalid .env line {line_number}: expected KEY=value")
 
@@ -90,7 +93,7 @@ def load_env_file(path=".env", environ=None):
         if name in values:
             continue
 
-        values[name] = _strip_optional_quotes(value.strip())
+        values[name] = _strip_optional_quotes(_strip_inline_comment(value).strip())
         loaded_count += 1
 
     return loaded_count
@@ -123,5 +126,23 @@ def _strip_optional_quotes(value):
     """Remove matching single or double quotes around an environment value."""
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return value[1:-1]
+
+    return value
+
+
+def _strip_inline_comment(value):
+    """Remove unquoted inline comments from an environment value."""
+    quote = None
+
+    for index, character in enumerate(value):
+        if character in {"'", '"'}:
+            if quote == character:
+                quote = None
+            elif quote is None:
+                quote = character
+
+        if character == "#" and quote is None:
+            if index == 0 or value[index - 1].isspace():
+                return value[:index]
 
     return value

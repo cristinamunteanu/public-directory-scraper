@@ -110,7 +110,8 @@ cp .env.example .env
 ```
 
 The `etl` command loads `.env` automatically. Existing shell environment variables
-are not overwritten by `.env` values.
+are not overwritten by `.env` values. The parser supports `KEY=value`,
+`export KEY=value`, blank lines, comments, and simple inline comments.
 
 Current ETL-related environment variables:
 
@@ -238,7 +239,7 @@ dropdb public_directory_scraper
 - Crawl delay is fixed between paginated requests.
 - The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
 - The ETL command requires a reachable Postgres database through `DATABASE_URL`.
-- `.env` loading supports simple `KEY=value` lines only.
+- `.env` loading intentionally supports only simple one-line values.
 - ETL logging uses the standard logging module, but no file or JSON logging is configured.
 - There is no live-site change detection yet.
 - The screenshot is a static preview of the sample output.
