@@ -1208,3 +1208,29 @@ Known limitations:
 
 Next recommended step:
 - Re-run the final critical review and decide whether finding 2 should be fixed.
+
+## 2026-06-15
+
+Narrowed ETL CLI exception handling.
+
+Why this structure:
+- Expected runtime failures still produce friendly CLI errors.
+- Unexpected programming errors are no longer hidden by a broad `except Exception`.
+- Psycopg database errors are handled when the Postgres driver is installed.
+
+Important tradeoffs:
+- If a new expected runtime error type appears, it needs to be added deliberately.
+- This keeps the CLI safer during development.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- Error classification is still simple.
+
+Next recommended step:
+- Re-run the final critical review and decide whether finding 3 should be fixed.

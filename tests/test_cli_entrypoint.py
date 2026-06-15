@@ -872,7 +872,7 @@ class CliEntrypointTest(unittest.TestCase):
                 database_url="postgresql://localhost/public_directory_scraper",
             )
             connect.return_value = connection
-            run_books_etl.side_effect = RuntimeError("load failed")
+            run_books_etl.side_effect = OSError("load failed")
 
             exit_code = main(
                 [
@@ -894,6 +894,36 @@ class CliEntrypointTest(unittest.TestCase):
             "run-1",
             "https://books.toscrape.com/",
         )
+        self.assertTrue(connection.closed)
+
+    def test_etl_command_does_not_hide_unexpected_errors(self):
+        connection = FakeConnection()
+
+        with (
+            patch("public_directory_scraper.__main__.load_env_file"),
+            patch("public_directory_scraper.__main__.load_config") as load_config,
+            patch("public_directory_scraper.__main__.connect") as connect,
+            patch("public_directory_scraper.__main__.create_tables"),
+            patch("public_directory_scraper.__main__.run_books_etl") as run_books_etl,
+            redirect_stdout(io.StringIO()),
+            redirect_stderr(io.StringIO()),
+        ):
+            load_config.return_value = EtlConfig(
+                database_url="postgresql://localhost/public_directory_scraper",
+            )
+            connect.return_value = connection
+            run_books_etl.side_effect = RuntimeError("programming mistake")
+
+            with self.assertRaisesRegex(RuntimeError, "programming mistake"):
+                main(
+                    [
+                        "etl",
+                        "https://books.toscrape.com/",
+                        "--run-id",
+                        "run-1",
+                    ]
+                )
+
         self.assertTrue(connection.closed)
 
 

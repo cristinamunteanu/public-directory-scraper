@@ -16,6 +16,14 @@ from .scraper import scrape_pages
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+EXPECTED_ETL_ERRORS = (OSError, ValueError)
+
+try:
+    from psycopg import Error as PsycopgError
+except ImportError:
+    pass
+else:
+    EXPECTED_ETL_ERRORS = (*EXPECTED_ETL_ERRORS, PsycopgError)
 
 
 class _CliArgumentParser(argparse.ArgumentParser):
@@ -248,7 +256,7 @@ def main(argv=None) -> int:
                 delay=delay,
                 retries=retries,
             )
-        except Exception as error:
+        except EXPECTED_ETL_ERRORS as error:
             logger.exception("ETL run %s failed for %s", parsed_args.run_id, url)
             print(f"Error: could not run ETL for {url}: {error}", file=sys.stderr)
             return 1
