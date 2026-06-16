@@ -1312,3 +1312,29 @@ Known limitations:
 
 Next recommended step:
 - Re-run the final critical review and decide whether the ETL feature is complete.
+
+## 2026-06-16
+
+Removed fixture-driven runtime paths.
+
+Why this structure:
+- The parser now targets Books to Scrape markup only.
+- Fetching defaults to `http` and `https`, removing local `file://` runtime support.
+- CLI tests use mocks or temporary inline HTML instead of checked-in fixture files.
+
+Important tradeoffs:
+- Tests still run without internet by mocking network boundaries.
+- The `parse` command still accepts a user-provided saved HTML file.
+
+How to test:
+
+```bash
+.venv/bin/python -m unittest discover -s tests
+.venv/bin/ruff check src tests
+```
+
+Known limitations:
+- The scraper remains tailored to Books to Scrape.
+
+Next recommended step:
+- Review README one more time and commit the documentation plus fixture cleanup.

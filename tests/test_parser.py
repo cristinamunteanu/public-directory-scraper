@@ -1,5 +1,4 @@
 import unittest
-from pathlib import Path
 
 from public_directory_scraper.parser import (
     parse_listing,
@@ -7,67 +6,55 @@ from public_directory_scraper.parser import (
     parse_next_page_url,
 )
 
-FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+BOOKS_HTML = """
+<article class="product_pod">
+  <p class="star-rating Three"></p>
+  <h3>
+    <a
+      href="catalogue/a-light-in-the-attic_1000/index.html"
+      title="A Light in the Attic"
+    >Book</a>
+  </h3>
+  <img src="media/cache/book.jpg">
+  <p class="price_color">£51.77</p>
+  <p class="instock availability">In stock</p>
+</article>
+<article class="product_pod">
+  <p class="star-rating One"></p>
+  <h3>
+    <a
+      href="catalogue/tipping-the-velvet_999/index.html"
+      title="Tipping the Velvet"
+    >Book</a>
+  </h3>
+  <img src="media/cache/second.jpg">
+  <p class="price_color">£53.74</p>
+  <p class="instock availability">In stock</p>
+</article>
+<ul class="pager">
+  <li class="next"><a href="catalogue/page-2.html">next</a></li>
+</ul>
+"""
 
 
 class ParseListingTest(unittest.TestCase):
-    def test_parses_simple_listing(self):
-        html = (FIXTURES_DIR / "simple_listing.html").read_text(encoding="utf-8")
-
-        record = parse_listing(html)
+    def test_parses_first_books_to_scrape_listing(self):
+        record = parse_listing(BOOKS_HTML)
 
         self.assertEqual(
             record,
             {
-                "name": "Example Business",
-                "url": "https://example.com",
+                "title": "A Light in the Attic",
+                "price": "£51.77",
+                "availability": "In stock",
+                "rating": "Three",
+                "book_url": "catalogue/a-light-in-the-attic_1000/index.html",
+                "image_url": "media/cache/book.jpg",
             },
         )
 
-    def test_parses_multiple_listings(self):
-        html = (FIXTURES_DIR / "listings.html").read_text(encoding="utf-8")
-
-        records = parse_listings(html)
-
-        self.assertEqual(
-            records,
-            [
-                {
-                    "name": "Example Business",
-                    "url": "https://example.com",
-                },
-                {
-                    "name": "Second Business",
-                    "url": "https://second.example",
-                },
-            ],
-        )
-
-    def test_ignores_product_pod_text_without_books_markup(self):
-        html = """
-        <article>
-          <h2 data-field="name">Example Business</h2>
-          <a data-field="url" href="https://example.com">Visit website</a>
-          <p>product_pod appears in text only</p>
-        </article>
-        """
-
-        records = parse_listings(html)
-
-        self.assertEqual(
-            records,
-            [
-                {
-                    "name": "Example Business",
-                    "url": "https://example.com",
-                }
-            ],
-        )
-
     def test_parses_books_to_scrape_page(self):
-        html = (FIXTURES_DIR / "books_page.html").read_text(encoding="utf-8")
-
-        records = parse_listings(html)
+        records = parse_listings(BOOKS_HTML)
 
         self.assertEqual(
             records,
@@ -78,10 +65,7 @@ class ParseListingTest(unittest.TestCase):
                     "availability": "In stock",
                     "rating": "Three",
                     "book_url": "catalogue/a-light-in-the-attic_1000/index.html",
-                    "image_url": (
-                        "media/cache/2c/da/"
-                        "2cdad67c44b002e7ead0cc35693c0e8b.jpg"
-                    ),
+                    "image_url": "media/cache/book.jpg",
                 },
                 {
                     "title": "Tipping the Velvet",
@@ -89,19 +73,14 @@ class ParseListingTest(unittest.TestCase):
                     "availability": "In stock",
                     "rating": "One",
                     "book_url": "catalogue/tipping-the-velvet_999/index.html",
-                    "image_url": (
-                        "media/cache/26/0c/"
-                        "260c6ae16bce31c8f8c95dadd11e0f83.jpg"
-                    ),
+                    "image_url": "media/cache/second.jpg",
                 },
             ],
         )
 
     def test_parses_books_next_page_url(self):
-        html = (FIXTURES_DIR / "books_page.html").read_text(encoding="utf-8")
-
         next_page_url = parse_next_page_url(
-            html,
+            BOOKS_HTML,
             "https://books.toscrape.com/index.html",
         )
 
@@ -111,14 +90,20 @@ class ParseListingTest(unittest.TestCase):
         )
 
     def test_returns_empty_next_page_url_without_next_link(self):
-        html = (FIXTURES_DIR / "catalogue" / "page-2.html").read_text(
-            encoding="utf-8"
-        )
+        html = """
+        <article class="product_pod">
+          <p class="star-rating Four"></p>
+          <h3><a href="book.html" title="Book">Book</a></h3>
+        </article>
+        """
 
         self.assertEqual(parse_next_page_url(html, "https://books.toscrape.com/"), "")
 
-    def test_requires_name_and_url(self):
-        with self.assertRaisesRegex(ValueError, "listing must include name and url"):
+    def test_requires_books_markup(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "book listing must include title and book_url",
+        ):
             parse_listings("<article></article>")
 
 

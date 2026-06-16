@@ -1,6 +1,13 @@
 # Public Directory Scraper
 
-A small Python scraper that collects book listing data from [Books to Scrape](https://books.toscrape.com/), cleans the records, and saves them to CSV or Excel.
+A small Python scraper and ETL pipeline for [Books to Scrape](https://books.toscrape.com/).
+
+It can:
+
+- scrape book listing pages;
+- clean prices, ratings, text, URLs, and duplicate books;
+- save results to CSV or Excel;
+- load raw and cleaned records into Postgres.
 
 Books to Scrape is a public sandbox website built for scraping practice.
 
@@ -19,6 +26,8 @@ Fields:
 
 The scraper can follow pagination with `--pages N`, retry temporary fetch failures with `--retries N`, pause between paginated requests with `--delay SECONDS`, remove duplicate books by `book_url`, and write output files with `.csv` or `.xlsx` extensions.
 
+The ETL path also stores the original scraped values in a `raw_books` table before loading normalized records into `cleaned_books`.
+
 ## How To Run
 
 Create a virtual environment and install the project:
@@ -28,7 +37,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e ".[dev]"
 ```
 
-Run against the live site:
+Scrape the live site to CSV:
 
 ```bash
 .venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --timeout 10 --retries 1 --delay 1 --output books.csv
@@ -44,12 +53,6 @@ Save Excel output instead:
 
 ```bash
 .venv/bin/python -m public_directory_scraper scrape https://books.toscrape.com/ --pages 2 --timeout 10 --retries 1 --delay 1 --output books.xlsx
-```
-
-Run against the local fixture without internet access:
-
-```bash
-.venv/bin/python -m public_directory_scraper scrape file:///absolute/path/to/books_page.html --pages 2 --output books.csv
 ```
 
 Fetch a single page with retry and timeout options:
@@ -94,14 +97,18 @@ Useful local commands:
 
 ```bash
 .venv/bin/python -m public_directory_scraper
-.venv/bin/python -m public_directory_scraper parse tests/fixtures/books_page.html
 .venv/bin/python -m public_directory_scraper fetch https://books.toscrape.com/
 .venv/bin/python -m public_directory_scraper etl https://books.toscrape.com/ --run-id manual-test
 ```
 
 ## ETL Configuration
 
-The project is being extended toward a small Postgres ETL pipeline. Current ETL support includes configuration loading, a small Postgres connection wrapper, schema creation helpers, raw extraction, raw/cleaned table loaders, and a core ETL pipeline function.
+The ETL pipeline extracts book listings, stores the original records in Postgres, cleans and deduplicates them, then stores normalized records in a separate table.
+
+Tables:
+
+- `raw_books`: original scraped fields plus the full raw JSON payload.
+- `cleaned_books`: normalized fields ready for querying, unique by `book_url`.
 
 Copy the example environment file when you are ready to configure local database settings:
 
@@ -124,6 +131,12 @@ Current ETL-related environment variables:
 The ETL command logs start, success, and failure events through Python's standard
 `logging` module. It does not write log files by default.
 
+ETL flow:
+
+```text
+fetch pages -> parse raw records -> insert raw_books -> clean/deduplicate -> insert cleaned_books -> commit
+```
+
 ## Local Postgres Check
 
 Use this manual check when you have Postgres installed locally.
@@ -141,6 +154,11 @@ cp .env.example .env
 ```
 
 Edit `.env` if your local Postgres username, password, host, or port is different.
+For local socket authentication, this value is often enough:
+
+```env
+DATABASE_URL=postgresql:///public_directory_scraper
+```
 
 Run one small ETL load:
 
@@ -172,7 +190,7 @@ dropdb public_directory_scraper
 Run the optional Postgres integration test against that database:
 
 ```bash
-INTEGRATION_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/public_directory_scraper .venv/bin/python -m unittest tests.test_postgres_integration
+INTEGRATION_DATABASE_URL=postgresql:///public_directory_scraper .venv/bin/python -m unittest tests.test_postgres_integration
 ```
 
 The normal test command skips this integration test unless `INTEGRATION_DATABASE_URL`
@@ -196,13 +214,6 @@ is set.
 │   ├── schema.py
 │   └── scraper.py
 ├── tests/
-│   ├── fixtures/
-│   │   ├── books_page.html
-│   │   ├── catalogue/
-│   │   │   └── page-2.html
-│   │   ├── listings.html
-│   │   └── simple_listing.html
-│   ├── test_books_fixture.py
 │   ├── test_cleaner.py
 │   ├── test_config.py
 │   ├── test_database.py
@@ -233,11 +244,11 @@ is set.
 - `cleaner.py` normalizes prices, ratings, text, URLs, and duplicates.
 - `scraper.py` connects fetching, parsing, cleaning, raw extraction, and pagination.
 - `exporter.py` writes records to CSV or Excel.
-- `config.py` reads future ETL settings from environment variables.
-- `database.py` opens future Postgres connections.
+- `config.py` reads ETL settings from `.env` and environment variables.
+- `database.py` opens Postgres connections.
 - `loader.py` inserts raw and cleaned records into Postgres.
 - `pipeline.py` extracts raw records, loads raw rows, cleans records, and loads cleaned rows.
-- `schema.py` creates future raw and cleaned Postgres tables.
+- `schema.py` creates raw and cleaned Postgres tables.
 - `__main__.py` exposes the command-line interface.
 
 ## Limitations
@@ -246,7 +257,7 @@ is set.
 - Pagination is limited by the `--pages` value.
 - Retries are immediate; there is no exponential backoff.
 - Crawl delay is fixed between paginated requests.
-- The local CLI allows `file://` URLs for fixture-based development; production reuse should restrict input URLs to trusted `http` or `https` targets.
+- The fetcher accepts only `http` and `https` URLs by default.
 - The ETL command requires a reachable Postgres database through `DATABASE_URL`.
 - `.env` loading intentionally supports only simple one-line values.
 - ETL logging uses the standard logging module, but no file or JSON logging is configured.

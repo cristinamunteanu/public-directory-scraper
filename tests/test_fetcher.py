@@ -55,7 +55,7 @@ class FetchUrlTest(unittest.TestCase):
 
     def test_allows_callers_to_restrict_url_schemes(self):
         with self.assertRaisesRegex(ValueError, "URL scheme must be one of: https"):
-            fetch_url("file:///tmp/page.html", allowed_schemes={"https"})
+            fetch_url("http://example.com", allowed_schemes={"https"})
 
 
 if __name__ == "__main__":

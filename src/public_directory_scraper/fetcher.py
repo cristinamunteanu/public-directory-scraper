@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
-DEFAULT_ALLOWED_SCHEMES = {"file", "http", "https"}
+DEFAULT_ALLOWED_SCHEMES = {"http", "https"}
 
 
 @dataclass(frozen=True)
